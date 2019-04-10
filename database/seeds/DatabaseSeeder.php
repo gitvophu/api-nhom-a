@@ -14,19 +14,19 @@ class DatabaseSeeder extends Seeder
        DB::table('users')->insert([
            'name'=>'Nguyen A',
            'email'=>'nguyena@gmail.com',
-           'password'=>bcrypt('Nguyen A'),
+           'password'=>bcrypt('nguyena@gmail.com'),
 
        ]);
        DB::table('users')->insert([
            'name'=>'Nguyen b',
            'email'=>'nguyenb@gmail.com',
-           'password'=>bcrypt('Nguyen b'),
+           'password'=>bcrypt('nguyena@gmail.com'),
 
        ]);
        DB::table('users')->insert([
            'name'=>'Nguyen c',
            'email'=>'nguyenc@gmail.com',
-           'password'=>bcrypt('Nguyen c'),
+           'password'=>bcrypt('nguyena@gmail.com'),
 
        ]);
     }
