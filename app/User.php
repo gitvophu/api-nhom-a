@@ -30,12 +30,34 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+
     public static function insertUser($data){
         User::insert([
             'name'=>$data['name'],
             'email'=>$data['email'],
             'password'=>bcrypt($data['password']),
         ]);
+    }
+    
+    public static function show($id)
+    {
+        $user = User::find($id);
+        return $user;
+    }
+
+    public function create($user)
+    {
+        User::insert([
+            'name' => $user['name'],
+            'email' =>$user['email'],
+            'password' => $user['password'],
+        ]);
+    }
+
+    public function deleteuser($id)
+    {
+        $user = User::where('id',$id);
+        $user->delete();
     }
 
 }

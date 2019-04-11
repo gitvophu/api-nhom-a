@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Http\Models\User;
+use App\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
-    public $successStatus = 200;
+
     public function index()
     {
         return $users = User::all();
@@ -26,7 +26,7 @@ class UserController extends Controller
     public function loginUser(Request $request)
     {
         $input = $request->only('email', 'password');
-        if(Auth::attempt($input)){ 
+        if(Auth::attempt($input)){
             return response()->json(['success' => true], 200); 
         } 
         else{ 
