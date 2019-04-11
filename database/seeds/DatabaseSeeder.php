@@ -21,13 +21,11 @@ class DatabaseSeeder extends Seeder
            'name'=>'Nguyen b',
            'email'=>'nguyenb@gmail.com',
            'password'=>bcrypt('nguyena@gmail.com'),
-
        ]);
        DB::table('users')->insert([
            'name'=>'Nguyen c',
            'email'=>'nguyenc@gmail.com',
            'password'=>bcrypt('nguyena@gmail.com'),
-
        ]);
     }
 }
