@@ -2,17 +2,15 @@
 
 namespace App;
 
-use App\User;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Auth;
 
 class User extends Authenticatable
 {
     use Notifiable;
 
-    protected $table = 'users';
-    protected $primaryKey = 'id';
+    protected $table = "users";
+    protected $primarykey = "id";
 
     /**
      * The attributes that are mass assignable.
@@ -31,5 +29,35 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+
+    public static function insertUser($data){
+        User::insert([
+            'name'=>$data['name'],
+            'email'=>$data['email'],
+            'password'=>bcrypt($data['password']),
+        ]);
+    }
+    
+    public static function show($id)
+    {
+        $user = User::find($id);
+        return $user;
+    }
+
+    public function create($user)
+    {
+        User::insert([
+            'name' => $user['name'],
+            'email' =>$user['email'],
+            'password' => $user['password'],
+        ]);
+    }
+
+    public function deleteuser($id)
+    {
+        $user = User::where('id',$id);
+        $user->delete();
+    }
 
 }

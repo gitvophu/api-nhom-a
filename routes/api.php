@@ -2,6 +2,7 @@
 
 use App\Http\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,15 +23,9 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
-
-Route::get('users', 'UserController@index');
-
-Route::post('user/login', 'UserController@login');
-
-Route::get('user/userInfo/{id}', 'UserController@userInfo');
-
-Route::post('user/store', 'UserController@store');
-
-Route::put('user/update/{id}', 'UserController@update');
-
-Route::delete('user/delete/{id}', 'UserController@delete');
+Route::get('/users','UserController@index')->name('showalluser');
+Route::get('/users/{id}','UserController@showUser')->name('showauser');
+Route::post('/user/login','UserController@loginUser')->name('loginuser');
+Route::post('/users/create','UserController@createUser')->name('createUser');
+Route::put('/users/update/{id}','UserController@updateUser')->name('updateuser');
+Route::delete('/users/delete/{id}','UserController@deleteUser')->name('deleteuser');

@@ -2,74 +2,86 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+
+use App\User;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
 
-    public function index(){
-        return response()->json(['list' => User::all()], 200);
+    public function index()
+    {
+        return $users = User::all();
     }
 
-    public function login(Request $request){
-        $req = $request->only('email', 'password');
-        if(Auth::attempt($req))
-        {
-            return response()->json(['login' => true], 200);
-        }else {
-            return response()->json(['login' => false], 401);
+    public function showUser($id)
+    {
+        $user = new User();
+        $obj = $user->show($id);
+        return $obj;
+    }
+
+    public function loginUser(Request $request)
+    {
+        $input = $request->only('email', 'password');
+        if(Auth::attempt($input)){
+            return response()->json(['success' => true], 200); 
+        } 
+        else{ 
+            return response()->json(['error' => false], 401); 
         }
     }
 
-    public function userInfo($id){
-        $user = User::find($id);
-        if(!$user)
-        {
-            return response()->json(['error' => 'Not found!'], 404);
-        }
-        return response()->json(['success' => $user], 200);
-    }
-
-    public function store(Request $request){
+    public function createUser(Request $request)
+    {
+        $user = new User();
         $validator = Validator::make($request->all(),[
             'name' => 'required',
             'email' => 'required|email',
-            'password' => 'required'
+            'password' => 'required',
         ]);
-        if($validator->fails())
-        {
-            return response()->json(['error' => $validator->errors()], 401);
+        if ($validator->fails()) { 
+            return response()->json(['error'=>$validator->errors()], 401);            
         }
         $input = $request->all();
         $input['password'] = bcrypt($input['password']);
-        $user = User::insert($input);
-        var_dump($user);die();
-        return response()->json(['success' => 'Create success'], 200);
+        $user_ = $user->create($input);
+        return response()->json(['success'=> 'create success'], 200);
     }
 
-    public function update(Request $request, $id)
+    public function updateUser(Request $request,$id)
     {
+        $user_id = User::find($id);
         $validator = Validator::make($request->all(),[
             'name' => '',
-            'email' => 'email',
-            'password' => ''
+            'password' => '',
         ]);
-        if($validator->fails())
-        {
-            return response()->json(['error' => $validator->errors()], 401);
+        if($validator->fails()){
+            return response()->json(['error' => 'fail'],400);
         }
-        $input = $request->all();
-        $input['password'] = bcrypt($input['password']);
-        $user = User::where('id', $id)->update($input);
-        return response()->json(['success' => $user], 200);
+        $user_id->name = $request['name'];
+        if($request->name == null)
+        {
+            $user_id->name = $user_id->name;
+        }else{
+            $user_id->name = $request['name'];
+        }
+        if($request->password == null)
+        {
+            $user_id->password = $user_id->password;
+        }else{
+            $user_id->password = bcrypt($request->password);
+        }
+        $user_id->save();
+        return response()->json(['success' => 'uppdate success'],200);
     }
 
-    public function delete($id){
-        $user = User::findOrFail($id);
-        $user->delete();
-        return response()->json(['success' => 'Delete seccuess'], 204);
+    public function deleteUser($id)
+    {
+        $user = new User();
+        $obj = $user->deleteuser($id);
+        return response()->json(['success' => 'delete success'],204);
     }
 }
