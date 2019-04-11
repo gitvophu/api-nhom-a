@@ -1,5 +1,6 @@
 <?php
 
+use Faker\Factory;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -11,23 +12,20 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-       DB::table('users')->insert([
-           'name'=>'Nguyen A',
-           'email'=>'nguyena@gmail.com',
-           'password'=>bcrypt('nguyena@gmail.com'),
+        $faker = Faker\Factory::create();
+        //tao user
+        for($i=0;$i<100;$i++){
+            DB::table('users')->insert([
+                'name'=>$faker->name,
+                'email'=>$faker->email,
+                'password'=>bcrypt('111'),
+     
+            ]);
+        }
 
-       ]);
-       DB::table('users')->insert([
-           'name'=>'Nguyen b',
-           'email'=>'nguyenb@gmail.com',
-           'password'=>bcrypt('nguyena@gmail.com'),
+        //cate
+        
 
-       ]);
-       DB::table('users')->insert([
-           'name'=>'Nguyen c',
-           'email'=>'nguyenc@gmail.com',
-           'password'=>bcrypt('nguyena@gmail.com'),
-
-       ]);
+      
     }
 }
