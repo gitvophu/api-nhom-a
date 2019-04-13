@@ -86,4 +86,10 @@ class User extends Authenticatable
        
     }
 
+    public function search($query)
+    {
+        $user = User::where('name','like',"%{$query}%");
+        return $user;
+    }
+
 }

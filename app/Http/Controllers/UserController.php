@@ -56,9 +56,10 @@ class UserController extends Controller
 
     public function search(Request $request)
     {
-        $input = $request->get('q');
-        $user = User::where('name', 'LIKE', "%{$input}%")->paginate(1);
-        return response()->json(['success' => $user], 200);
+        $input = $request->get('key');
+        $user = new User();
+        $obj = $user->search($input)->paginate(2);
+        return response()->json(['success' => $obj], 200);
 
     }
     public function createUser(Request $request)
