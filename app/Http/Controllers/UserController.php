@@ -10,7 +10,7 @@ use CURLFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-
+use Laravel\Passport\HasApiTokens;
 class UserController extends Controller
 {
     protected $obj_user ;
@@ -25,11 +25,7 @@ class UserController extends Controller
 
     public function paging(Request $request)
     {
-        $perPage = 5;
-        $page_id = $request->input('page');
-        $limit = ($page_id - 1) * $perPage;
-
-        $users = User::paginate($perPage, ['*'], $limit, $page_id)->setPageName('page');
+        $users = User::paginate(3);
         return $users;
     }
     public function showUser($id)
@@ -47,7 +43,7 @@ class UserController extends Controller
     {
         $input = $request->only('email', 'password');
         if(Auth::attempt($input)){
-            $user = \auth()->user();
+            $user = \auth()->user();//lấy chính nó
             $user->token = str_random(32);
             $user->token_expire = strtotime('1 days');
             $user->save();
@@ -64,7 +60,7 @@ class UserController extends Controller
         $user = User::where('token', '=', $input)
             ->update([
                'token' => null,
-                'token_expire' => null,
+               'token_expire' => null,
             ]);
         if ($user){
             return response()->json([
@@ -78,11 +74,10 @@ class UserController extends Controller
 
     public function search(Request $request)
     {
-        $input = $request->get('q');
-
-        $user = User::where('name', 'LIKE', "%{$input}%")->get();
-
-        return response()->json(['success' => $user], 200);
+        $input = $request->get('key');
+        $user = new User();
+        $obj = $user->search($input)->paginate(2);
+        return response()->json(['success' => $obj], 200);
 
     }
     public function createUser(Request $request)
