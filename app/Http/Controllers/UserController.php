@@ -19,7 +19,8 @@ class UserController extends Controller
     }
     public function index()
     {
-        return $users = User::all();
+        $users = User::all();
+        return response()->json(['List User' => $users], 200);
     }
 
     public function paging(Request $request)
@@ -35,7 +36,11 @@ class UserController extends Controller
     {
         $user = new User();
         $obj = $user->show($id);
-        return $obj;
+        if($obj){
+            return response()->json(['Success' => $obj], 200);
+        }
+        return response()->json(['Fail' => 'Không tìm thấy User'], 201);
+
     }
 
     public function loginUser(Request $request)
@@ -55,19 +60,20 @@ class UserController extends Controller
     }
     public function logoutUser(Request $request)
     {
-
-        $input = $request->only('email', 'password');
-        if(Auth::attempt($input)){
-            $user = \auth()->user();
-            $user->token = str_random(32);
-            //$user->token_expire = strtotime();
-            $user->save();
-
-            return response()->json(['success' => $user], 200);
+        $input = $request->input('token');
+        $user = User::where('token', '=', $input)
+            ->update([
+               'token' => null,
+                'token_expire' => null,
+            ]);
+        if ($user){
+            return response()->json([
+                'message' => "logout success"
+            ], 200);
         }
-        else{
-            return response()->json(['error' => false], 401);
-        }
+        return response()->json([
+            'message' => "Unauthorized user"
+        ], 401);
     }
 
     public function search(Request $request)
