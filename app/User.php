@@ -18,7 +18,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password', 'token'
     ];
 
     /**
@@ -58,6 +58,39 @@ class User extends Authenticatable
     {
         $user = User::where('id',$id);
         $user->delete();
+    }
+
+
+    public function updateWithImage($request){
+        // dd($request->all());
+        
+        $user = User::where('email',$request->email)->first();
+        if ($user) {
+            // $user->phone = $request->phone;
+            $user->name = $request->name;
+            
+            if ($request->hasFile('image')) {
+                $file = $request->file('image');
+                $fileName = $file->getClientOriginalName();
+                $file->move('uploads',$fileName);
+                $user->image = $fileName;
+                // $file->
+               
+            }
+            $user->save();
+            return true;
+        }
+        return false;
+        
+
+       
+    }
+
+    public function search($query)
+    {
+        $user = User::where('name','like',"%{$query}%")
+                        ->orWhere('email','like',"%{$query}%");
+        return $user;
     }
 
 }

@@ -2,38 +2,84 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 use App\User;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Auth;
 
+use Illuminate\Support\Arr;
+
+use CURLFile;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Laravel\Passport\HasApiTokens;
 class UserController extends Controller
 {
-
+    protected $obj_user ;
+    function __construct(){
+        $this->obj_user = new User();
+    }
     public function index()
     {
-        return $users = User::all();
+        $users = User::all();
+        return response()->json(['List User' => $users], 200);
     }
 
+    public function paging(Request $request)
+    {
+        $users = User::paginate(3);
+        return $users;
+    }
     public function showUser($id)
     {
         $user = new User();
         $obj = $user->show($id);
-        return $obj;
+        if($obj){
+            return response()->json(['Success' => $obj], 200);
+        }
+        return response()->json(['Fail' => 'Không tìm thấy User'], 201);
+
     }
 
     public function loginUser(Request $request)
     {
         $input = $request->only('email', 'password');
         if(Auth::attempt($input)){
-            return response()->json(['success' => true], 200); 
+            $user = \auth()->user();//lấy chính nó
+            $user->token = str_random(32);
+            $user->token_expire = strtotime('1 days');
+            $user->save();
+
+            return response()->json(['success' => $user], 200);
         } 
         else{ 
             return response()->json(['error' => false], 401); 
         }
     }
+    public function logoutUser(Request $request)
+    {
+        $input = $request->input('token');
+        $user = User::where('token', '=', $input)
+            ->update([
+               'token' => null,
+               'token_expire' => null,
+            ]);
+        if ($user){
+            return response()->json([
+                'message' => "logout success"
+            ], 200);
+        }
+        return response()->json([
+            'message' => "Unauthorized user"
+        ], 401);
+    }
 
+    public function search(Request $request)
+    {
+        $input = $request->get('key');
+        $user = new User();
+        $obj = $user->search($input)->paginate(2);
+        return response()->json(['success' => $obj], 200);
+
+    }
     public function createUser(Request $request)
     {
         $user = new User();
@@ -83,5 +129,42 @@ class UserController extends Controller
         $user = new User();
         $obj = $user->deleteuser($id);
         return response()->json(['success' => 'delete success'],204);
+    }
+
+    public function updateWithImage(Request $request){
+        $validator = Validator::make($request->all(),[
+            'name'=>'required',
+            'email'=>'required',
+            'phone'=>'required',
+            'image'=>'required',
+        ],[]);
+        if ($validator->fails()) {
+            return response()->json(['error'=>'Tham so truyen vao con thieu'],201);
+        }
+        $rs = $this->obj_user->updateWithImage($request);
+        if ($rs) {
+            return response()->json(['success'=>'Cap nhat thanh cong'],200);
+        }
+        else{
+            return response()->json(['error'=>'Email ko ton tai, ko tim thay user'],201);
+        }
+    }
+    public function send_upload(Request $request){
+        // dd($_FILES['image']['tmp_name']);
+        $request = curl_init();
+        $_token = csrf_token();
+        curl_setopt($request,CURLOPT_URL,'http://127.0.0.1:9000/api/users/update-with-image');
+        curl_setopt($request,CURLOPT_POST,true);
+        
+        $cfile = new CURLFile($_FILES['image']['tmp_name'],$_FILES['image']['type'],$_FILES['image']['name']);
+        curl_setopt($request,CURLOPT_POSTFIELDS,[
+            // '_token'=>$_token,
+            // 'image'=>'@'.$_FILES['image']['tmp_name'],
+            // 'image_name'=>$_FILES['image']['name']
+            'image'=>$cfile
+        ]);
+        $rs = curl_exec($request);
+        curl_close($request);
+        dd($rs);
     }
 }
