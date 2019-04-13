@@ -17,7 +17,7 @@ use App\Http\Models\User;
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
-});
+});   
 Route::get('/users','UserController@index')->name('showalluser');
 Route::get('/users/page','UserController@paging')->name('paging');
 Route::get('/users/search','UserController@search')->name('search');
@@ -27,3 +27,8 @@ Route::post('/users/logout','UserController@logoutUser')->name('loginUser');
 Route::post('/users/create','UserController@createUser')->name('createUser');
 Route::put('/users/update/{id}','UserController@updateUser')->name('updateuser');
 Route::delete('/users/delete/{id}','UserController@deleteUser')->name('deleteuser');
+
+Route::group(['prefix'=>'users'],function(){
+    Route::post('/update-with-image','UserController@updateWithImage');
+   
+});
