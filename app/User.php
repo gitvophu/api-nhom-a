@@ -88,7 +88,8 @@ class User extends Authenticatable
 
     public function search($query)
     {
-        $user = User::where('name','like',"%{$query}%");
+        $user = User::where('name','like',"%{$query}%")
+                        ->orWhere('email','like',"%{$query}%");
         return $user;
     }
 
