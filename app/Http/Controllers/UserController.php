@@ -91,9 +91,9 @@ class UserController extends Controller
 
     public function updateWithImage(Request $request){
         $validator = Validator::make($request->all(),[
-            'name'=>'required',
+            // 'name'=>'required',
             'email'=>'required',
-            'phone'=>'required',
+            // 'phone'=>'required',
             'image'=>'required',
         ],[]);
         if ($validator->fails()) {
