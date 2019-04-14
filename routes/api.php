@@ -19,8 +19,11 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });   
 Route::get('/users','UserController@index')->name('showalluser');
+Route::post('/users/page','UserController@paging')->name('paging');
+Route::get('/users/search','UserController@search')->name('search');
 Route::get('/users/{id}','UserController@showUser')->name('showauser');
-Route::post('/user/login','UserController@loginUser')->name('loginuser');
+Route::post('/users/login','UserController@loginUser')->name('loginUser');
+Route::get('/users/logout','UserController@logoutUser')->name('logoutUser');
 Route::post('/users/create','UserController@createUser')->name('createUser');
 Route::put('/users/update/{id}','UserController@updateUser')->name('updateuser');
 Route::delete('/users/delete/{id}','UserController@deleteUser')->name('deleteuser');
