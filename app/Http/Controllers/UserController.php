@@ -84,44 +84,88 @@ class UserController extends Controller
     {
         $user = new User();
         $validator = Validator::make($request->all(),[
-            'name' => 'required',
-            'email' => 'required|email',
-            'password' => 'required',
+            'name' => 'required|min:3',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:6',
+        ],
+        [
+            'name.required' => 'Chưa nhập tên',
+            'email.required' => 'Email không hợp lệ',
+            'password.required' => 'Mật khẩu quá ngắn',
         ]);
         if ($validator->fails()) { 
-            return response()->json(['error'=>$validator->errors()], 401);            
+            return response()->json(['error' => $validator->errors(), 'status' => 401], 401);            
         }
         $input = $request->all();
         $input['password'] = bcrypt($input['password']);
         $user_ = $user->create($input);
-        return response()->json(['success'=> 'create success'], 200);
+        return response()->json(['success'=> 'create success', 'status' => 201], 201);
     }
 
     public function updateUser(Request $request,$id)
     {
-        $user_id = User::find($id);
-        $validator = Validator::make($request->all(),[
-            'name' => '',
-            'password' => '',
-        ]);
-        if($validator->fails()){
-            return response()->json(['error' => 'fail'],400);
+        // $user_id = User::find($id);
+        // $validator = Validator::make($request->all(),[
+        //     'name' => '',
+        //     'password' => '',
+        // ]);
+        // if($validator->fails()){
+        //     return response()->json(['error' => 'fail'],400);
+        // }
+        // $user_id->name = $request['name'];
+        // if($request->name == null)
+        // {
+        //     $user_id->name = $user_id->name;
+        // }else{
+        //     $user_id->name = $request['name'];
+        // }
+        // if($request->password == null)
+        // {
+        //     $user_id->password = $user_id->password;
+        // }else{
+        //     $user_id->password = bcrypt($request->password);
+        // }
+        if($request->password != null)
+        {            
+            if($request->name != null)
+            {
+                $validator = Validator::make($request->all(),
+                    [
+                        'name' => 'required|min:3',
+                        'password' => 'required|min:6'
+                    ]
+                );
+                if ($validator->fails()) {
+                    return response()->json(['error' => $validator, 'status' => 401], 401);
+                }
+                else {
+                    User::updateUserChangeName_Password($request->all(), $id);
+                    return response()->json(['success' => 'Update name, password success', 'status' => 200], 200);
+                }
+            }
+            else {
+                $validator = Validator::make($request->all(),
+                    [
+                        'password' => 'required|min:6'
+                    ]
+                );
+                if ($validator->fails()) {
+                    return response()->json(['error' => $validator, 'status' => 401], 401);
+                }
+                else {
+                    User::updateUserChangePassword($request->all(), $id);
+                    return response()->json(['success' => 'Update password success', 'status' => 200], 200);
+                }
+            }
         }
-        $user_id->name = $request['name'];
-        if($request->name == null)
-        {
-            $user_id->name = $user_id->name;
-        }else{
-            $user_id->name = $request['name'];
+        else {
+            if($request->name == null)
+            {
+                return response()->json(['error' => 'Name not null', 'status' => 401], 401);
+            }
         }
-        if($request->password == null)
-        {
-            $user_id->password = $user_id->password;
-        }else{
-            $user_id->password = bcrypt($request->password);
-        }
-        $user_id->save();
-        return response()->json(['success' => 'uppdate success'],200);
+        User::updateUserNoChangePassword($request->all(), $id);
+        return response()->json(['success' => 'Update name success', 'status' => 200],200);
     }
 
     public function deleteUser($id)

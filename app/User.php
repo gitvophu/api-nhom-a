@@ -58,6 +58,28 @@ class User extends Authenticatable
     {
         $user = User::where('id',$id);
         $user->delete();
+    }    
+    
+    public static function updateUserChangePassword($data, $id){
+        User::where('id', $id)
+        ->update([
+            'password' => bcrypt($data['password']),
+        ]);
+    }
+
+    public static function updateUserChangeName_Password($data, $id){
+        User::where('id', $id)
+        ->update([
+            'name' => $data['name'],
+            'password' => bcrypt($data['password']),
+        ]);
+    }
+
+    public static function updateUserNoChangePassword($data, $id){
+        User::where('id', $id)
+        ->update([
+            'name' => $data['name'],
+        ]);
     }
 
 
