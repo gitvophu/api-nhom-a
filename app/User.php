@@ -89,7 +89,7 @@ class User extends Authenticatable
         $user = User::where('email',$request->email)->first();
         if ($user) {
             // $user->phone = $request->phone;
-            $user->name = $request->name;
+            // $user->name = $request->name;
             
             if ($request->hasFile('image')) {
                 $file = $request->file('image');
