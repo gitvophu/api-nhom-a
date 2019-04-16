@@ -58,9 +58,12 @@ class UserController extends Controller
     {
         $input = $request->get('key');
         $user = new User();
-        $obj = $user->search($input)->paginate(2);
-        return response()->json(['success' => $obj], 200);
-
+        $obj = $user->search($input);
+        if($obj)
+        {
+            $obj->paginate(2);
+            return response()->json(['success' => $obj], 200);
+        }
     }
     public function createUser(Request $request)
     {
