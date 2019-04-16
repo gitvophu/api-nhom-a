@@ -74,14 +74,25 @@ class UserController extends Controller
 
     public function search(Request $request)
     {
-        $input = $request->get('key');
+        $validator = Validator::make($request->all(),[
+            'key' => '',
+            'token'=>'required',
+        ],
+        [
+            'token' => 'Tai khoan chua xac thuc',
+        ]);
         $user = new User();
-        $obj = $user->search($input);
-        if($obj)
+        if($request->token == null)
         {
-            $obj->paginate(2);
-            return response()->json(['success' => $obj], 200);
-        }
+            return response()->json(['error' => $validator->errors(), 'Tai khoan chua xac thuc' => 401], 401);   
+        }else{
+            $obj = $user->search($request->key);
+            if($obj)
+            {
+                $obj->paginate(2);
+                return response()->json(['success' => $obj], 200);
+            }
+        } 
     }
     public function createUser(Request $request)
     {
