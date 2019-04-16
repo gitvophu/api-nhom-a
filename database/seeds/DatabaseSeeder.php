@@ -12,75 +12,41 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-       DB::table('users')->insert([
-           'name'=>'Nguyen b',
-           'email'=>'nguyenb@gmail.com',
-           'password'=>bcrypt('nguyena@gmail.com'),
-       ]);
-       DB::table('users')->insert([
-           'name'=>'Nguyen a',
-           'email'=>'nguyenc@gmail.com',
-           'password'=>bcrypt('nguyena@gmail.com'),
-       ]);
         DB::table('users')->insert([
-            'name'=>'Nguyen aa',
-            'email'=>'nguyen1@gmail.com',
-            'password'=>bcrypt('nguyena@gmail.com'),
+            'name' => 'Nguyen A',
+            'email' => 'nguyena@gmail.com',
+            'password' => bcrypt('nguyena@gmail.com'),
         ]);
         DB::table('users')->insert([
-            'name'=>'Nguyen c',
-            'email'=>'nguyen2@gmail.com',
-            'password'=>bcrypt('nguyena@gmail.com'),
+            'name' => 'Nguyen B',
+            'email' => 'nguyenb@gmail.com',
+            'password' => bcrypt('nguyenb@gmail.com'),
         ]);
         DB::table('users')->insert([
-            'name'=>'Nguyen b',
-            'email'=>'nguyen3@gmail.com',
-            'password'=>bcrypt('nguyena@gmail.com'),
+            'name' => 'Nguyen C',
+            'email' => 'nguyenc@gmail.com',
+            'password' => bcrypt('nguyenc@gmail.com'),
         ]);
         DB::table('users')->insert([
-            'name'=>'Nguyen c',
-            'email'=>'nguyen4@gmail.com',
-            'password'=>bcrypt('nguyena@gmail.com'),
+            'name' => 'Nguyen D',
+            'email' => 'nguyend@gmail.com',
+            'password' => bcrypt('nguyend@gmail.com'),
         ]);
         DB::table('users')->insert([
-            'name'=>'Nguyen b',
-            'email'=>'nguyen5@gmail.com',
-            'password'=>bcrypt('nguyena@gmail.com'),
+            'name' => 'Nguyen E',
+            'email' => 'nguyene@gmail.com',
+            'password' => bcrypt('nguyene@gmail.com'),
         ]);
         DB::table('users')->insert([
-            'name'=>'Nguyen c',
-            'email'=>'nguyen6@gmail.com',
-            'password'=>bcrypt('nguyena@gmail.com'),
+            'name' => 'Nguyen F',
+            'email' => 'nguyenf@gmail.com',
+            'password' => bcrypt('nguyenf@gmail.com'),
         ]);
         DB::table('users')->insert([
-            'name'=>'Nguyen b',
-            'email'=>'nguyen7@gmail.com',
-            'password'=>bcrypt('nguyena@gmail.com'),
+            'name' => 'Nguyen G',
+            'email' => 'nguyeng@gmail.com',
+            'password' => bcrypt('nguyeng@gmail.com'),
         ]);
-        DB::table('users')->insert([
-            'name'=>'Nguyen c',
-            'email'=>'nguyen8@gmail.com',
-            'password'=>bcrypt('nguyena@gmail.com'),
-        ]);
-        DB::table('users')->insert([
-            'name'=>'Nguyen b',
-            'email'=>'nguyen9@gmail.com',
-            'password'=>bcrypt('nguyena@gmail.com'),
-        ]);
-        DB::table('users')->insert([
-            'name'=>'Nguyen c',
-            'email'=>'nguyen10@gmail.com',
-            'password'=>bcrypt('nguyena@gmail.com'),
-        ]);
-        DB::table('users')->insert([
-            'name'=>'Nguyen b',
-            'email'=>'nguyen11@gmail.com',
-            'password'=>bcrypt('nguyena@gmail.com'),
-        ]);
-        DB::table('users')->insert([
-            'name'=>'Nguyen c',
-            'email'=>'nguyen12@gmail.com',
-            'password'=>bcrypt('nguyena@gmail.com'),
-        ]);
+
     }
 }
