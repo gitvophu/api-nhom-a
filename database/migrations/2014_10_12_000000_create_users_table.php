@@ -23,6 +23,7 @@ class CreateUsersTable extends Migration
             $table->string('token',100);
             $table->string('token_expire');
             $table->integer('token_status');
+            $table->integer('role');
 
             $table->rememberToken();
             $table->timestamps();
