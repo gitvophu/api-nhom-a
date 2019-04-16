@@ -18,7 +18,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password', 'token'
     ];
 
     /**
@@ -58,6 +58,61 @@ class User extends Authenticatable
     {
         $user = User::where('id',$id);
         $user->delete();
+    }    
+    
+    public static function updateUserChangePassword($data, $id){
+        User::where('id', $id)
+        ->update([
+            'password' => bcrypt($data['password']),
+        ]);
+    }
+
+    public static function updateUserChangeName_Password($data, $id){
+        User::where('id', $id)
+        ->update([
+            'name' => $data['name'],
+            'password' => bcrypt($data['password']),
+        ]);
+    }
+
+    public static function updateUserNoChangePassword($data, $id){
+        User::where('id', $id)
+        ->update([
+            'name' => $data['name'],
+        ]);
+    }
+
+
+    public function updateWithImage($request){
+        // dd($request->all());
+        
+        $user = User::where('email',$request->email)->first();
+        if ($user) {
+            // $user->phone = $request->phone;
+            // $user->name = $request->name;
+            
+            if ($request->hasFile('image')) {
+                $file = $request->file('image');
+                $fileName = $file->getClientOriginalName();
+                $file->move('uploads',$fileName);
+                $user->image = $fileName;
+                // $file->
+               
+            }
+            $user->save();
+            return true;
+        }
+        return false;
+        
+
+       
+    }
+
+    public function search($query)
+    {
+        $user = User::where('name','like',"%{$query}%")
+                        ->orWhere('email','like',"%{$query}%");
+        return $user;
     }
 
 }
