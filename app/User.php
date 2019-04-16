@@ -87,22 +87,28 @@ class User extends Authenticatable
         // dd($request->all());
         
         $user = User::where('email',$request->email)->first();
-        if ($user) {
-            // $user->phone = $request->phone;
-            // $user->name = $request->name;
-            
-            if ($request->hasFile('image')) {
-                $file = $request->file('image');
-                $fileName = $file->getClientOriginalName();
-                $file->move('uploads',$fileName);
-                $user->image = $fileName;
-                // $file->
-               
+        if ($user->token == $request->token) {
+            if ($user) {
+                // $user->phone = $request->phone;
+                // $user->name = $request->name;
+                
+                if ($request->hasFile('image')) {
+                    $file = $request->file('image');
+                    $fileName = $file->getClientOriginalName();
+                    $file->move('uploads',$fileName);
+                    $user->image = $fileName;
+                    // $file->
+                   
+                }
+                $user->save();
+                return true;
             }
-            $user->save();
-            return true;
+            return false;
         }
-        return false;
+        else{
+            return response()->json(['error'=>'Loi xac thuc nguoi dung'],201);
+        }
+        
         
 
        

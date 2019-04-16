@@ -31,6 +31,7 @@ Route::post('/users/login','UserController@loginUser')->name('loginUser');
 Route::get('/users/logout','UserController@logoutUser')->name('logoutUser');
 Route::post('/users/create','UserController@createUser')->name('createUser');
 Route::put('/users/update/{id}','UserController@updateUser')->name('updateuser');
+Route::put('/users/change-password/{id}','UserController@changeUserPassword')->name('change-password');
 Route::delete('/users/delete/{id}','UserController@deleteUser')->name('deleteuser');
 
 Route::group(['prefix'=>'users'],function(){

@@ -115,8 +115,37 @@ class UserController extends Controller
         $user_ = $user->create($input);
         return response()->json(['success'=> 'create success', 'status' => 201], 201);
     }
+    public function updateUser(Request $request, $id)
+    {
+        // dd($request->all());
+        $user_id = User::find($id);
+        $validator = Validator::make($request->all(),[
+            'name' => 'required',
+            'token'=>'required'
 
-    public function updateUser(Request $request,$id)
+        ]);
+        // if($validator->fails()){
+        //     return response()->json(['error' => 'fail'],400);
+        // }
+        if ($request->token == null) {
+            return response()->json(['error' => 'Loi xac thuc nguoi dung'],500);
+           
+        }
+        else{
+            if ($user_id->token == $request->token) {
+                $user_id->name = $request->name;
+            }
+            else{
+                return response()->json(['error' => 'Loi xac thuc nguoi dung'],500);
+            }
+        }
+       
+        
+        
+        $user_id->save();
+        return response()->json(['success' => 'Cap nhat user thanh cong'],200);
+    }
+    public function changeUserPassword(Request $request, $id)
     {
         // $user_id = User::find($id);
         // $validator = Validator::make($request->all(),[
@@ -186,10 +215,16 @@ class UserController extends Controller
     {
         $user = new User();
         $obj = $user->deleteuser($id);
-        return response()->json(['success' => 'delete success'],204);
+        return response()->json(['success' => 'delete success'], 204);
+    }
+
+    public function upload()
+    {
+        
     }
 
     public function updateWithImage(Request $request){
+        // dd($request->all());
         $validator = Validator::make($request->all(),[
             // 'name'=>'required',
             'email'=>'required',
@@ -198,6 +233,12 @@ class UserController extends Controller
         ],[]);
         if ($validator->fails()) {
             return response()->json(['error'=>'Tham so truyen vao con thieu'],201);
+        }
+        if ($request->token == null) {
+            return response()->json(['error'=>'Loi xac thuc nguoi dung'],201);
+        }
+        else{
+            
         }
         $rs = $this->obj_user->updateWithImage($request);
         if ($rs) {
