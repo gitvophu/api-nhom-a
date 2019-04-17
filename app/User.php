@@ -61,7 +61,7 @@ class User extends Authenticatable
 
     public function deleteuser($id)
     {
-        $user = User::where('id',$id);
+        $user = User::where('id',$id)->first();
         $user->delete();
     }    
     
@@ -93,22 +93,29 @@ class User extends Authenticatable
         // dd($request->all());
         
         $user = User::where('email',$request->email)->first();
-        if ($user) {
-            // $user->phone = $request->phone;
-            // $user->name = $request->name;
-            
-            if ($request->hasFile('image')) {
-                $file = $request->file('image');
-                $fileName = $file->getClientOriginalName();
-                $file->move('uploads',$fileName);
-                $user->image = $fileName;
-                // $file->
-               
+        if ($user->token == $request->token) {
+            if ($user) {
+                // $user->phone = $request->phone;
+                // $user->name = $request->name;
+                
+                if ($request->hasFile('image')) {
+                    $file = $request->file('image');
+                    $fileName = $file->getClientOriginalName();
+                    $file->move('uploads',$fileName);
+                    $user->image = $fileName;
+                    // $file->
+                   
+                }
+                $user->save();
+                return true;
             }
-            $user->save();
-            return true;
+            return false;
         }
-        return false;
+        else{
+            
+            return response()->json(['error'=>'Loi xac thuc nguoi dung'],401);
+        }
+        
         
 
        
@@ -116,8 +123,10 @@ class User extends Authenticatable
 
     public function search($query)
     {
-        $user = User::where('name','like',"%{$query}%")
-                        ->orWhere('email','like',"%{$query}%");
+        $user = User::where('name','like',"%{$query}%")                       
+                        ->orWhere('email','like',"%{$query}%")
+                        ->Select('name','email')
+                        ;
         return $user;
     }
 

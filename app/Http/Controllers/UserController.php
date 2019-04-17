@@ -74,12 +74,21 @@ class UserController extends Controller
 
     public function search(Request $request)
     {
-        $input = $request->get('key');
-        $user = new User();
-        $obj = $user->search($input);
-        if($obj)
+        $validator = Validator::make($request->all(),[
+            'key' => '',
+            'token'=>'required',
+        ],
+        [
+            'token' => 'Unauthorized user',
+        ]);
+        $user_id = User::where('token','=',$request->token)->get();
+        if($request->token == null)
         {
-            $obj->paginate(2);
+            return response()->json(['error' => $validator->errors(), 'Unauthorized user' => 401], 401); 
+        }else
+        {
+            $user = new User();
+            $obj = $user->search($request->key)->paginate(2);
             return response()->json(['success' => $obj], 200);
         }
     }
@@ -117,12 +126,26 @@ class UserController extends Controller
         // dd($request->all());
         $user_id = User::find($id);
         $validator = Validator::make($request->all(),[
-            // 'name' => 'required',
+            'name' => 'required',
+            'token'=>'required'
+
         ]);
-        if($validator->fails()){
-            return response()->json(['error' => 'fail'],400);
+        // if($validator->fails()){
+        //     return response()->json(['error' => 'fail'],400);
+        // }
+        if ($request->token == null) {
+            return response()->json(['error' => 'Loi xac thuc nguoi dung'],401);
+           
         }
-        $user_id->name = $request->name;
+        else{
+            if ($user_id->token == $request->token) {
+                $user_id->name = $request->name;
+            }
+            else{
+                return response()->json(['error' => 'Loi xac thuc nguoi dung'],401);
+            }
+        }
+       
         
         
         $user_id->save();
@@ -193,11 +216,24 @@ class UserController extends Controller
         return response()->json(['success' => 'Update password success', 'status' => 200], 200);
     }
 
-    public function deleteUser($id)
+    public function deleteUser(Request $request,$id)
     {
-        $user = new User();
-        $obj = $user->deleteuser($id);
-        return response()->json(['success' => 'delete success'], 204);
+        $input = $request->get('token');
+        $user_admin = User::where('token','=',$request->token)->first();
+        if($input != null)
+        {
+            if($user_admin['role'] == 0)
+            {
+                $user = new User();
+                $obj = $user->deleteuser($id);
+                return response()->json(['success' => 'delete success'], 200);
+            }else {
+                return response()->json(['error' => 'Admin moi xoa duoc'], 404);
+            }
+        }else{
+                return response()->json(['error' => 'Unauthorized user'], 206);       
+        }
+        
     }
 
     public function upload()
@@ -215,6 +251,12 @@ class UserController extends Controller
         ],[]);
         if ($validator->fails()) {
             return response()->json(['error'=>'Tham so truyen vao con thieu'],201);
+        }
+        if ($request->token == null) {
+            return response()->json(['error'=>'Loi xac thuc nguoi dung'],401);
+        }
+        else{
+            
         }
         $rs = $this->obj_user->updateWithImage($request);
         if ($rs) {
