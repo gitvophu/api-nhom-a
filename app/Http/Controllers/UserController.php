@@ -41,7 +41,14 @@ class UserController extends Controller
 
     public function loginUser(Request $request)
     {
-        $input = $request->only('email', 'password');
+        $input = $request->only('email','password');
+        $validator = Validator::make($request->all(),[
+            'email' => 'required|email|',
+            'password' => 'required|min:6',
+        ]);
+        if ($validator->fails()) { 
+            return response()->json(['error' => $validator->errors(), 'fails' => 401], 401);            
+        }
         if(Auth::attempt($input)){
             $user = \auth()->user();//lấy chính nó
             $user->token = str_random(32);
@@ -74,30 +81,48 @@ class UserController extends Controller
 
     public function search(Request $request)
     {
-        $input = $request->get('key');
-        $user = new User();
-        $obj = $user->search($input);
-        if($obj)
+        $validator = Validator::make($request->all(),[
+            'key' => '',
+            'token'=>'required',
+        ],
+        [
+            'token' => 'Unauthorized user',
+        ]);
+        $a = new User();
+        $user_id = $a->checkToken($request->all()); //User::where('token','=',$request->token)->get();
+        if($request->token == null)
         {
-            $obj->paginate(2);
+            return response()->json(['error' => $validator->errors(), 'Unauthorized user' => 401], 401); 
+        }else
+        {
+            $user = new User();
+            $obj = $user->search($request->key)->paginate(2);
             return response()->json(['success' => $obj], 200);
         }
     }
     public function createUser(Request $request)
     {
-        $user = new User();
         $validator = Validator::make($request->all(),[
             'name' => 'required|min:3',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6',
+            'token' => 'required'
         ],
         [
             'name.required' => 'Chưa nhập tên',
             'email.required' => 'Email không hợp lệ',
             'password.required' => 'Mật khẩu quá ngắn',
+            'token.required' => 'Yeu cau xac thuc nguoi dung'
         ]);
         if ($validator->fails()) { 
-            return response()->json(['error' => $validator->errors(), 'status' => 401], 401);            
+            return response()->json(['error' => $validator->errors(), 'status' => 400], 400);            
+        }
+        $user = User::createByToken($request->all());
+        if(!$user){
+            return response()->json(['error' => 'Unauthorized user', 'status' => 401], 401);
+        }
+        if (intval($user['role']) != 0){
+            return response()->json(['error' => 'Can not create an object because you do not have permission.', 'status' => 401], 401);
         }
         $input = $request->all();
         $input['password'] = bcrypt($input['password']);
@@ -117,7 +142,7 @@ class UserController extends Controller
             return response()->json($validator->errors(),400);
         }
         if ($request->token == null) {
-            return response()->json(['error' => 'Loi xac thuc nguoi dung'],401);
+            return response()->json(['error' => 'Loi xac thuc nguoi dung'],500);
            
         }
         else{
@@ -125,7 +150,7 @@ class UserController extends Controller
                 $user_id->name = $request->name;
             }
             else{
-                return response()->json(['error' => 'Loi xac thuc nguoi dung'],401);
+                return response()->json(['error' => 'Loi xac thuc nguoi dung'],500);
             }
         }
        
@@ -190,21 +215,32 @@ class UserController extends Controller
                 }
             }
         }
-        else {
-            if($request->name == null)
-            {
-                return response()->json(['error' => 'Name not null', 'status' => 401], 401);
-            }
+        if($user->token != $request->token)
+        {
+            return response()->json(['error' => 'Unauthorized user', 'status' => 401], 401);
         }
-        User::updateUserNoChangePassword($request->all(), $id);
-        return response()->json(['success' => 'Update name success', 'status' => 200],200);
+        User::updateUserChangePassword($request->all(), $id);
+        return response()->json(['success' => 'Update password success', 'status' => 200], 200);
     }
 
-    public function deleteUser($id)
+    public function deleteUser(Request $request,$id)
     {
-        $user = new User();
-        $obj = $user->deleteuser($id);
-        return response()->json(['success' => 'delete success'], 204);
+        $input = $request->get('token');
+        $user_admin = User::where('token','=',$request->token)->first();
+        if($input != null)
+        {
+            if($user_admin['role'] == 0)
+            {
+                $user = new User();
+                $obj = $user->deleteuser($id);
+                return response()->json(['success' => 'delete success'], 200);
+            }else {
+                return response()->json(['error' => 'Admin moi xoa duoc'], 404);
+            }
+        }else{
+                return response()->json(['error' => 'Unauthorized user'], 206);       
+        }
+        
     }
 
     public function upload()
@@ -224,7 +260,7 @@ class UserController extends Controller
             return response()->json($validator->errors(),201);
         }
         if ($request->token == null) {
-            return response()->json(['error'=>'Loi xac thuc nguoi dung'],401);
+            return response()->json(['error'=>'Loi xac thuc nguoi dung'],201);
         }
        
         $rs = $this->obj_user->updateWithImage($request);

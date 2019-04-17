@@ -54,14 +54,20 @@ class User extends Authenticatable
         ]);
     }
 
+    public static function createByToken($token)
+    {
+        return User::where('token', $token['token'])->first();
+    }
+
     public function deleteuser($id)
     {
-        $user = User::where('id',$id);
+        $user = User::where('id',$id)->first();
         $user->delete();
     }    
     
     public static function updateUserChangePassword($data, $id){
         User::where('id', $id)
+        ->where('token', $data['token'])
         ->update([
             'password' => bcrypt($data['password']),
         ]);
@@ -106,8 +112,7 @@ class User extends Authenticatable
             return false;
         }
         else{
-            
-            return response()->json(['error'=>'Loi xac thuc nguoi dung'],401);
+            return response()->json(['error'=>'Loi xac thuc nguoi dung'],201);
         }
         
         
@@ -117,9 +122,16 @@ class User extends Authenticatable
 
     public function search($query)
     {
-        $user = User::where('name','like',"%{$query}%")
-                        ->orWhere('email','like',"%{$query}%");
+        $user = User::where('name','like',"%{$query}%")                      
+                        ->orWhere('email','like',"%{$query}%")
+                        ->Select('name','email');
         return $user;
+    }
+
+    public function checkToken($request)
+    {
+        $obj = User::where('token','=',$request['token'])->first();
+        return $obj;
     }
 
 }
