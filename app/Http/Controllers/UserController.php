@@ -79,20 +79,18 @@ class UserController extends Controller
             'token'=>'required',
         ],
         [
-            'token' => 'Tai khoan chua xac thuc',
+            'token' => 'Unauthorized user',
         ]);
-        $user = new User();
+        $user_id = User::where('token','=',$request->token)->get();
         if($request->token == null)
         {
-            return response()->json(['error' => $validator->errors(), 'Tai khoan chua xac thuc' => 401], 401);   
-        }else{
-            $obj = $user->search($request->key);
-            if($obj)
-            {
-                $obj->paginate(2);
-                return response()->json(['success' => $obj], 200);
-            }
-        } 
+            return response()->json(['error' => $validator->errors(), 'Unauthorized user' => 401], 401); 
+        }else
+        {
+            $user = new User();
+            $obj = $user->search($request->key)->paginate(2);
+            return response()->json(['success' => $obj], 200);
+        }
     }
     public function createUser(Request $request)
     {
@@ -147,27 +145,6 @@ class UserController extends Controller
     }
     public function changeUserPassword(Request $request, $id)
     {
-        // $user_id = User::find($id);
-        // $validator = Validator::make($request->all(),[
-        //     'name' => '',
-        //     'password' => '',
-        // ]);
-        // if($validator->fails()){
-        //     return response()->json(['error' => 'fail'],400);
-        // }
-        // $user_id->name = $request['name'];
-        // if($request->name == null)
-        // {
-        //     $user_id->name = $user_id->name;
-        // }else{
-        //     $user_id->name = $request['name'];
-        // }
-        // if($request->password == null)
-        // {
-        //     $user_id->password = $user_id->password;
-        // }else{
-        //     $user_id->password = bcrypt($request->password);
-        // }
         if($request->password != null)
         {            
             if($request->name != null)
@@ -211,11 +188,24 @@ class UserController extends Controller
         return response()->json(['success' => 'Update name success', 'status' => 200],200);
     }
 
-    public function deleteUser($id)
+    public function deleteUser(Request $request,$id)
     {
-        $user = new User();
-        $obj = $user->deleteuser($id);
-        return response()->json(['success' => 'delete success'], 204);
+        $input = $request->get('token');
+        $user_admin = User::where('token','=',$request->token)->first();
+        if($input != null)
+        {
+            if($user_admin['role'] == 0)
+            {
+                $user = new User();
+                $obj = $user->deleteuser($id);
+                return response()->json(['success' => 'delete success'], 200);
+            }else {
+                return response()->json(['error' => 'Admin moi xoa duoc'], 404);
+            }
+        }else{
+                return response()->json(['error' => 'Unauthorized user'], 206);       
+        }
+        
     }
 
     public function upload()

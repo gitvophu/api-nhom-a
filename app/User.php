@@ -56,7 +56,7 @@ class User extends Authenticatable
 
     public function deleteuser($id)
     {
-        $user = User::where('id',$id);
+        $user = User::where('id',$id)->first();
         $user->delete();
     }    
     
@@ -116,8 +116,10 @@ class User extends Authenticatable
 
     public function search($query)
     {
-        $user = User::where('name','like',"%{$query}%")
-                        ->orWhere('email','like',"%{$query}%");
+        $user = User::where('name','like',"%{$query}%")                       
+                        ->orWhere('email','like',"%{$query}%")
+                        ->Select('name','email')
+                        ;
         return $user;
     }
 
