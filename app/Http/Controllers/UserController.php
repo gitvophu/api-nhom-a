@@ -17,25 +17,66 @@ class UserController extends Controller
     function __construct(){
         $this->obj_user = new User();
     }
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::all();
-        return response()->json(['List User' => $users], 200);
+        $validator = Validator::make($request->all(), [
+            'token' => 'required',
+        ], [
+            'token.required' => 'The token field is required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => 401, 'error' => $validator->errors()], 401);
+        }
+        $check = User::checkToken_P($request->all());
+        //var_dump($user);die();
+        if ($check == true) {
+            $users = User::showAllUser();
+            return response()->json(['status' => 200, 'List User' => $users], 200);
+        }else{
+            return response()->json(['status' => 401, 'error' => 'Account has not been verified'], 401);
+        }
     }
 
     public function paging(Request $request)
     {
-        $users = User::paginate(3);
-        return $users;
-    }
-    public function showUser($id)
-    {
-        $user = new User();
-        $obj = $user->show($id);
-        if($obj){
-            return response()->json(['Success' => $obj], 200);
+        $validator = Validator::make($request->all(),[
+            'token' => 'required',
+        ],[
+            'token.required' => 'The token field is required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => 401, 'error' => $validator->errors()], 401);
         }
-        return response()->json(['Fail' => 'Không tìm thấy User'], 201);
+        $check = User::checkToken_P($request->all());
+        if($check == true){
+            $users = User::pageUser();
+            return response()->json(['status' => 206, 'List User' => $users], 206);
+        }else{
+            return response()->json(['status' => 401, 'error' => 'Account has not been verified'], 401);
+        }
+    }
+    public function showUser(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(),[
+            'token' => 'required',
+        ],[
+            'token.required' => 'The token field is required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => 401, 'error' => $validator->errors()], 401);
+        }
+        $check = User::checkToken_P($request->all());
+        if($check == true){
+            $user = new User();
+            $obj = $user->show($id);
+            if($obj){
+                return response()->json(['status' => 200, 'User' => $obj], 200);
+            }else{
+                return response()->json(['status' => 201, 'Fail' => 'Find not User'], 201);
+            }
+        }else{
+            return response()->json(['status' => 401, 'error' => 'Account has not been verified'], 401);
+        }
 
     }
 
@@ -63,20 +104,21 @@ class UserController extends Controller
     }
     public function logoutUser(Request $request)
     {
-        $input = $request->input('token');
-        $user = User::where('token', '=', $input)
-            ->update([
-               'token' => null,
-               'token_expire' => null,
-            ]);
-        if ($user){
-            return response()->json([
-                'message' => "logout success"
-            ], 200);
+        $validator = Validator::make($request->all(),[
+            'token' => 'required',
+        ],[
+            'token.required' => 'The token field is required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => 401, 'error' => $validator->errors()], 401);
         }
-        return response()->json([
-            'message' => "Unauthorized user"
-        ], 401);
+        $check = User::checkToken_P($request->all());
+        if($check == true){
+            User::logoutUser($request->all());
+            return response()->json(['status' => 200, 'message' => "Logout success"], 200);
+        }else{
+            return response()->json(['status' => 401, 'message' => "Unauthorized user"], 401);
+        }
     }
 
     public function search(Request $request)

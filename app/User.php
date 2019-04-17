@@ -30,6 +30,29 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+     public static function checkToken_P($request){
+        $user = User::where('token', '=', $request['token'])->first();
+        if ($user){
+            return true;
+        }
+        return false;
+    }
+
+    public static function showAllUser(){
+        return User::select('id', 'name', 'email')->get();
+    }
+
+    public static function pageUser(){
+        return User::select('id', 'name', 'email')->paginate(5);
+    }
+
+    public static function logoutUser($request){
+        User::where('token', '=', $request['token'])
+            ->update([
+                'token' => null,
+                'token_expire' => null,
+            ]);
+    }
 
     public static function insertUser($data){
         User::insert([
@@ -41,7 +64,7 @@ class User extends Authenticatable
     
     public static function show($id)
     {
-        $user = User::find($id);
+        $user = User::where('id', '=', $id)->select('id', 'name', 'email')->get();
         return $user;
     }
 
