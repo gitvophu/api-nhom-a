@@ -54,6 +54,11 @@ class User extends Authenticatable
         ]);
     }
 
+    public static function createByToken($token)
+    {
+        return User::where('token', $token['token'])->first();
+    }
+
     public function deleteuser($id)
     {
         $user = User::where('id',$id)->first();
@@ -62,6 +67,7 @@ class User extends Authenticatable
     
     public static function updateUserChangePassword($data, $id){
         User::where('id', $id)
+        ->where('token', $data['token'])
         ->update([
             'password' => bcrypt($data['password']),
         ]);

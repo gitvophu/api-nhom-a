@@ -102,19 +102,27 @@ class UserController extends Controller
     }
     public function createUser(Request $request)
     {
-        $user = new User();
         $validator = Validator::make($request->all(),[
             'name' => 'required|min:3',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6',
+            'token' => 'required'
         ],
         [
             'name.required' => 'Chưa nhập tên',
             'email.required' => 'Email không hợp lệ',
             'password.required' => 'Mật khẩu quá ngắn',
+            'token.required' => 'Yeu cau xac thuc nguoi dung'
         ]);
         if ($validator->fails()) { 
-            return response()->json(['error' => $validator->errors(), 'status' => 401], 401);            
+            return response()->json(['error' => $validator->errors(), 'status' => 400], 400);            
+        }
+        $user = User::createByToken($request->all());
+        if(!$user){
+            return response()->json(['error' => 'Unauthorized user', 'status' => 401], 401);
+        }
+        if (intval($user['role']) != 0){
+            return response()->json(['error' => 'Can not create an object because you do not have permission.', 'status' => 401], 401);
         }
         $input = $request->all();
         $input['password'] = bcrypt($input['password']);
@@ -207,14 +215,12 @@ class UserController extends Controller
                 }
             }
         }
-        else {
-            if($request->name == null)
-            {
-                return response()->json(['error' => 'Name not null', 'status' => 401], 401);
-            }
+        if($user->token != $request->token)
+        {
+            return response()->json(['error' => 'Unauthorized user', 'status' => 401], 401);
         }
-        User::updateUserNoChangePassword($request->all(), $id);
-        return response()->json(['success' => 'Update name success', 'status' => 200],200);
+        User::updateUserChangePassword($request->all(), $id);
+        return response()->json(['success' => 'Update password success', 'status' => 200], 200);
     }
 
     public function deleteUser(Request $request,$id)
