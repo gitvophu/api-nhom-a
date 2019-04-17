@@ -109,13 +109,13 @@ class UserController extends Controller
         // dd($request->all());
         $user_id = User::find($id);
         $validator = Validator::make($request->all(),[
-            'name' => 'required',
+            'name' => 'required|min:2',
             'token'=>'required'
-
         ]);
-        // if($validator->fails()){
-        //     return response()->json(['error' => 'fail'],400);
-        // }
+        if($validator->fails()){
+
+            return response()->json($validator->errors(),400);
+        }
         if ($request->token == null) {
             return response()->json(['error' => 'Loi xac thuc nguoi dung'],401);
            
@@ -218,17 +218,15 @@ class UserController extends Controller
             // 'name'=>'required',
             'email'=>'required',
             // 'phone'=>'required',
-            'image'=>'required',
+            'image'=>'required|image|mimes:jpeg,jpg,png,gif,svg|max:2048',
         ],[]);
         if ($validator->fails()) {
-            return response()->json(['error'=>'Tham so truyen vao con thieu'],201);
+            return response()->json($validator->errors(),201);
         }
         if ($request->token == null) {
             return response()->json(['error'=>'Loi xac thuc nguoi dung'],401);
         }
-        else{
-            
-        }
+       
         $rs = $this->obj_user->updateWithImage($request);
         if ($rs) {
             return response()->json(['success'=>'Cap nhat thanh cong'],200);
