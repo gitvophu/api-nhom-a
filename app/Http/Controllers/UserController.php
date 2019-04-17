@@ -126,7 +126,7 @@ class UserController extends Controller
         //     return response()->json(['error' => 'fail'],400);
         // }
         if ($request->token == null) {
-            return response()->json(['error' => 'Loi xac thuc nguoi dung'],500);
+            return response()->json(['error' => 'Loi xac thuc nguoi dung'],401);
            
         }
         else{
@@ -134,7 +134,7 @@ class UserController extends Controller
                 $user_id->name = $request->name;
             }
             else{
-                return response()->json(['error' => 'Loi xac thuc nguoi dung'],500);
+                return response()->json(['error' => 'Loi xac thuc nguoi dung'],401);
             }
         }
        
@@ -225,7 +225,7 @@ class UserController extends Controller
             return response()->json(['error'=>'Tham so truyen vao con thieu'],201);
         }
         if ($request->token == null) {
-            return response()->json(['error'=>'Loi xac thuc nguoi dung'],201);
+            return response()->json(['error'=>'Loi xac thuc nguoi dung'],401);
         }
         else{
             
