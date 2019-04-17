@@ -21,6 +21,7 @@ class CreateUsersTable extends Migration
             $table->string('email',100)->unique();
             $table->string('password',100);
             $table->string('token',100);
+            $table->string('reset_pass_token',100);
             $table->integer('token_expire');
             $table->integer('token_status');
             $table->integer('role');

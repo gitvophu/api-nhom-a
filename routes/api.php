@@ -36,5 +36,5 @@ Route::delete('/users/delete/{id}','UserController@deleteUser')->name('deleteuse
 
 Route::group(['prefix'=>'users'],function(){
     Route::post('/update-with-image','UserController@updateWithImage');
-   
+    Route::post('/sendMail','UserController@phuSendMail');
 });

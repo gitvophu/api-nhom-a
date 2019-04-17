@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use App\User;
 
-use Illuminate\Support\Arr;
-
 use CURLFile;
+
+use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use Laravel\Passport\HasApiTokens;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
+
 class UserController extends Controller
 {
     protected $obj_user ;
@@ -288,5 +290,61 @@ class UserController extends Controller
         $rs = curl_exec($request);
         curl_close($request);
         dd($rs);
+    }
+
+    function phuSendMail(Request $request){
+        $validator = Validator::make($request->all(),[
+            'email'=>'required|email',
+        ],[]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(),201);
+        }
+        $email = $request->email;
+        if ($email == null) {
+            return response()->json(['error'=>'Chua truyen email']);
+        }
+        $reset_pass_token = str_random(30);
+        $user = User::where('email',$email)->first();
+        if (!$user) {
+            return response()->json(['error'=>'Email ko ton tai']);
+        }
+        $user->reset_pass_token = $reset_pass_token;
+        $user->save();
+        $link = route('reset-link',['token'=>$reset_pass_token,'email'=>$email]);
+        // dd($link);
+        Mail::send('emails.reset_email', array(
+            'link'=> $link
+        ), function($message) use ($email){
+	        $message->to($email, 'User')->subject('Xin chào');
+	    });
+        
+        return response()->json(['success'=>'Gửi email thành công']);
+    }
+
+    function phuResetLink($token, $email){
+        $user = User::where('email',$email)->first();
+
+        if ($user->reset_pass_token == $token) {
+            return view("reset_form",compact('email'));
+        }
+        else{
+            echo "sai ";
+        }
+    }
+    function do_reset(Request $request){
+        $validator = Validator::make($request->all(),[
+            'email'=>'required|email',
+            'password'=>'required|min:6'
+        ],[]);
+        if ($validator->fails()) {
+            echo "Reset mật khẩu thất bại, lỗi dữ liệu truyền vào ko đúng ràng buộc";
+        }
+        $email = $request->email;
+        $password = $request->password;
+        $user = User::where('email',$email)->first();
+        $user->password = bcrypt($password);
+        $user->reset_pass_token = "";
+        $user->save();
+        echo "Reset mật khẩu thành công";
     }
 }
