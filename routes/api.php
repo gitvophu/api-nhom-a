@@ -34,6 +34,7 @@ Route::put('/users/update/{id}','UserController@updateUser')->name('updateuser')
 Route::put('/users/change-password/{id}','UserController@changeUserPassword')->name('change-password');
 Route::delete('/users/delete/{id}','UserController@deleteUser')->name('deleteuser');
 
+
 Route::group(['prefix'=>'users'],function(){
     Route::post('/update-with-image','UserController@updateWithImage');
    

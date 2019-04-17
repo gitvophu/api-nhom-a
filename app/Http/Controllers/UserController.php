@@ -4,13 +4,16 @@ namespace App\Http\Controllers;
 
 use App\User;
 
-use Illuminate\Support\Arr;
-
 use CURLFile;
+
+use App\Mail\TestEmail;
+use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use Laravel\Passport\HasApiTokens;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
+
 class UserController extends Controller
 {
     protected $obj_user ;
@@ -233,11 +236,6 @@ class UserController extends Controller
         }else{
                 return response()->json(['error' => 'Unauthorized user'], 206);       
         }
-        
-    }
-
-    public function upload()
-    {
         
     }
 
