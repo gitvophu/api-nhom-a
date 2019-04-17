@@ -6,6 +6,7 @@ use App\User;
 
 use CURLFile;
 
+use App\Mail\TestEmail;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Laravel\Passport\HasApiTokens;
@@ -284,11 +285,6 @@ class UserController extends Controller
         }else{
                 return response()->json(['error' => 'Unauthorized user'], 206);       
         }
-        
-    }
-
-    public function upload()
-    {
         
     }
 
