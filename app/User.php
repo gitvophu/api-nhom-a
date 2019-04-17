@@ -106,8 +106,7 @@ class User extends Authenticatable
             return false;
         }
         else{
-            
-            return response()->json(['error'=>'Loi xac thuc nguoi dung'],401);
+            return response()->json(['error'=>'Loi xac thuc nguoi dung'],201);
         }
         
         
@@ -117,11 +116,16 @@ class User extends Authenticatable
 
     public function search($query)
     {
-        $user = User::where('name','like',"%{$query}%")                       
+        $user = User::where('name','like',"%{$query}%")                      
                         ->orWhere('email','like',"%{$query}%")
-                        ->Select('name','email')
-                        ;
+                        ->Select('name','email');
         return $user;
+    }
+
+    public function checkToken($request)
+    {
+        $obj = User::where('token','=',$request['token'])->first();
+        return $obj;
     }
 
 }

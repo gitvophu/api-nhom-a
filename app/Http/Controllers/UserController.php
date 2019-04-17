@@ -41,7 +41,14 @@ class UserController extends Controller
 
     public function loginUser(Request $request)
     {
-        $input = $request->only('email', 'password');
+        $input = $request->only('email','password');
+        $validator = Validator::make($request->all(),[
+            'email' => 'required|email|',
+            'password' => 'required|min:6',
+        ]);
+        if ($validator->fails()) { 
+            return response()->json(['error' => $validator->errors(), 'fails' => 401], 401);            
+        }
         if(Auth::attempt($input)){
             $user = \auth()->user();//lấy chính nó
             $user->token = str_random(32);
@@ -81,7 +88,8 @@ class UserController extends Controller
         [
             'token' => 'Unauthorized user',
         ]);
-        $user_id = User::where('token','=',$request->token)->get();
+        $a = new User();
+        $user_id = $a->checkToken($request->all()); //User::where('token','=',$request->token)->get();
         if($request->token == null)
         {
             return response()->json(['error' => $validator->errors(), 'Unauthorized user' => 401], 401); 
@@ -126,7 +134,7 @@ class UserController extends Controller
         //     return response()->json(['error' => 'fail'],400);
         // }
         if ($request->token == null) {
-            return response()->json(['error' => 'Loi xac thuc nguoi dung'],401);
+            return response()->json(['error' => 'Loi xac thuc nguoi dung'],500);
            
         }
         else{
@@ -134,7 +142,7 @@ class UserController extends Controller
                 $user_id->name = $request->name;
             }
             else{
-                return response()->json(['error' => 'Loi xac thuc nguoi dung'],401);
+                return response()->json(['error' => 'Loi xac thuc nguoi dung'],500);
             }
         }
        
@@ -145,6 +153,27 @@ class UserController extends Controller
     }
     public function changeUserPassword(Request $request, $id)
     {
+        // $user_id = User::find($id);
+        // $validator = Validator::make($request->all(),[
+        //     'name' => '',
+        //     'password' => '',
+        // ]);
+        // if($validator->fails()){
+        //     return response()->json(['error' => 'fail'],400);
+        // }
+        // $user_id->name = $request['name'];
+        // if($request->name == null)
+        // {
+        //     $user_id->name = $user_id->name;
+        // }else{
+        //     $user_id->name = $request['name'];
+        // }
+        // if($request->password == null)
+        // {
+        //     $user_id->password = $user_id->password;
+        // }else{
+        //     $user_id->password = bcrypt($request->password);
+        // }
         if($request->password != null)
         {            
             if($request->name != null)
@@ -225,7 +254,7 @@ class UserController extends Controller
             return response()->json(['error'=>'Tham so truyen vao con thieu'],201);
         }
         if ($request->token == null) {
-            return response()->json(['error'=>'Loi xac thuc nguoi dung'],401);
+            return response()->json(['error'=>'Loi xac thuc nguoi dung'],201);
         }
         else{
             
