@@ -20,31 +20,79 @@ class UserController extends Controller
     function __construct(){
         $this->obj_user = new User();
     }
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::all();
-        return response()->json(['List User' => $users], 200);
+        $validator = Validator::make($request->all(), [
+            'token' => 'required',
+        ], [
+            'token.required' => 'The token field is required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => 401, 'error' => $validator->errors()], 401);
+        }
+        $check = User::checkToken_P($request->all());
+        //var_dump($user);die();
+        if ($check == true) {
+            $users = User::showAllUser();
+            return response()->json(['status' => 200, 'List User' => $users], 200);
+        }else{
+            return response()->json(['status' => 401, 'error' => 'Account has not been verified'], 401);
+        }
     }
 
     public function paging(Request $request)
     {
-        $users = User::paginate(3);
-        return $users;
-    }
-    public function showUser($id)
-    {
-        $user = new User();
-        $obj = $user->show($id);
-        if($obj){
-            return response()->json(['Success' => $obj], 200);
+        $validator = Validator::make($request->all(),[
+            'token' => 'required',
+        ],[
+            'token.required' => 'The token field is required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => 401, 'error' => $validator->errors()], 401);
         }
-        return response()->json(['Fail' => 'Không tìm thấy User'], 201);
+        $check = User::checkToken_P($request->all());
+        if($check == true){
+            $users = User::pageUser();
+            return response()->json(['status' => 206, 'List User' => $users], 206);
+        }else{
+            return response()->json(['status' => 401, 'error' => 'Account has not been verified'], 401);
+        }
+    }
+    public function showUser(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(),[
+            'token' => 'required',
+        ],[
+            'token.required' => 'The token field is required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => 401, 'error' => $validator->errors()], 401);
+        }
+        $check = User::checkToken_P($request->all());
+        if($check == true){
+            $user = new User();
+            $obj = $user->show($id);
+            if($obj){
+                return response()->json(['status' => 200, 'User' => $obj], 200);
+            }else{
+                return response()->json(['status' => 201, 'Fail' => 'Find not User'], 201);
+            }
+        }else{
+            return response()->json(['status' => 401, 'error' => 'Account has not been verified'], 401);
+        }
 
     }
 
     public function loginUser(Request $request)
     {
-        $input = $request->only('email', 'password');
+        $input = $request->only('email','password');
+        $validator = Validator::make($request->all(),[
+            'email' => 'required|email|',
+            'password' => 'required|min:6',
+        ]);
+        if ($validator->fails()) { 
+            return response()->json(['error' => $validator->errors(), 'fails' => 401], 401);            
+        }
         if(Auth::attempt($input)){
             $user = \auth()->user();//lấy chính nó
             $user->token = str_random(32);
@@ -59,20 +107,21 @@ class UserController extends Controller
     }
     public function logoutUser(Request $request)
     {
-        $input = $request->input('token');
-        $user = User::where('token', '=', $input)
-            ->update([
-               'token' => null,
-               'token_expire' => null,
-            ]);
-        if ($user){
-            return response()->json([
-                'message' => "logout success"
-            ], 200);
+        $validator = Validator::make($request->all(),[
+            'token' => 'required',
+        ],[
+            'token.required' => 'The token field is required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => 401, 'error' => $validator->errors()], 401);
         }
-        return response()->json([
-            'message' => "Unauthorized user"
-        ], 401);
+        $check = User::checkToken_P($request->all());
+        if($check == true){
+            User::logoutUser($request->all());
+            return response()->json(['status' => 200, 'message' => "Logout success"], 200);
+        }else{
+            return response()->json(['status' => 401, 'message' => "Unauthorized user"], 401);
+        }
     }
 
     public function search(Request $request)
@@ -84,7 +133,8 @@ class UserController extends Controller
         [
             'token' => 'Unauthorized user',
         ]);
-        $user_id = User::where('token','=',$request->token)->get();
+        $a = new User();
+        $user_id = $a->checkToken($request->all()); //User::where('token','=',$request->token)->get();
         if($request->token == null)
         {
             return response()->json(['error' => $validator->errors(), 'Unauthorized user' => 401], 401); 
@@ -137,7 +187,7 @@ class UserController extends Controller
         //     return response()->json(['error' => 'fail'],400);
         // }
         if ($request->token == null) {
-            return response()->json(['error' => 'Loi xac thuc nguoi dung'],401);
+            return response()->json(['error' => 'Loi xac thuc nguoi dung'],500);
            
         }
         else{
@@ -145,7 +195,7 @@ class UserController extends Controller
                 $user_id->name = $request->name;
             }
             else{
-                return response()->json(['error' => 'Loi xac thuc nguoi dung'],401);
+                return response()->json(['error' => 'Loi xac thuc nguoi dung'],500);
             }
         }
        
@@ -155,61 +205,60 @@ class UserController extends Controller
         return response()->json(['success' => 'Cap nhat user thanh cong'],200);
     }
     public function changeUserPassword(Request $request, $id)
-    {        
-        // if($request->password != null)
-        // {            
-        //     if($request->name != null)
-        //     {
-        //         $validator = Validator::make($request->all(),
-        //             [
-        //                 'name' => 'required|min:3',
-        //                 'password' => 'required|min:6'
-        //             ]
-        //         );
-        //         if ($validator->fails()) {
-        //             return response()->json(['error' => $validator, 'status' => 401], 401);
-        //         }
-        //         else {
-        //             User::updateUserChangeName_Password($request->all(), $id);
-        //             return response()->json(['success' => 'Update name, password success', 'status' => 200], 200);
-        //         }
-        //     }
-        //     else {
-        //         $validator = Validator::make($request->all(),
-        //             [
-        //                 'password' => 'required|min:6'
-        //             ]
-        //         );
-        //         if ($validator->fails()) {
-        //             return response()->json(['error' => $validator, 'status' => 401], 401);
-        //         }
-        //         else {
-        //             User::updateUserChangePassword($request->all(), $id);
-        //             return response()->json(['success' => 'Update password success', 'status' => 200], 200);
-        //         }
-        //     }
+    {
+        // $user_id = User::find($id);
+        // $validator = Validator::make($request->all(),[
+        //     'name' => '',
+        //     'password' => '',
+        // ]);
+        // if($validator->fails()){
+        //     return response()->json(['error' => 'fail'],400);
         // }
-        // else {
-        //     if($request->name == null)
-        //     {
-        //         return response()->json(['error' => 'Name not null', 'status' => 401], 401);
-        //     }
+        // $user_id->name = $request['name'];
+        // if($request->name == null)
+        // {
+        //     $user_id->name = $user_id->name;
+        // }else{
+        //     $user_id->name = $request['name'];
         // }
-        // User::updateUserNoChangePassword($request->all(), $id);
-        $user = User::show($id);
-        
-        $validator = Validator::make($request->all(),
-            [
-                'password' => 'required|min:6',
-                'token' => 'required',
-            ],
-            [
-                'password.required' => 'Mật khẩu quá ngắn',
-                'token.required' => 'Yêu cầu xác thực người dùng'
-            ]
-        );
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors(), 'status' => 400], 400);
+        // if($request->password == null)
+        // {
+        //     $user_id->password = $user_id->password;
+        // }else{
+        //     $user_id->password = bcrypt($request->password);
+        // }
+        if($request->password != null)
+        {            
+            if($request->name != null)
+            {
+                $validator = Validator::make($request->all(),
+                    [
+                        'name' => 'required|min:3',
+                        'password' => 'required|min:6'
+                    ]
+                );
+                if ($validator->fails()) {
+                    return response()->json(['error' => $validator, 'status' => 401], 401);
+                }
+                else {
+                    User::updateUserChangeName_Password($request->all(), $id);
+                    return response()->json(['success' => 'Update name, password success', 'status' => 200], 200);
+                }
+            }
+            else {
+                $validator = Validator::make($request->all(),
+                    [
+                        'password' => 'required|min:6'
+                    ]
+                );
+                if ($validator->fails()) {
+                    return response()->json(['error' => $validator, 'status' => 401], 401);
+                }
+                else {
+                    User::updateUserChangePassword($request->all(), $id);
+                    return response()->json(['success' => 'Update password success', 'status' => 200], 200);
+                }
+            }
         }
         if($user->token != $request->token)
         {
@@ -251,7 +300,7 @@ class UserController extends Controller
             return response()->json(['error'=>'Tham so truyen vao con thieu'],201);
         }
         if ($request->token == null) {
-            return response()->json(['error'=>'Loi xac thuc nguoi dung'],401);
+            return response()->json(['error'=>'Loi xac thuc nguoi dung'],201);
         }
         else{
             

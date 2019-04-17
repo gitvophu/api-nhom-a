@@ -30,6 +30,29 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+     public static function checkToken_P($request){
+        $user = User::where('token', '=', $request['token'])->first();
+        if ($user){
+            return true;
+        }
+        return false;
+    }
+
+    public static function showAllUser(){
+        return User::select('id', 'name', 'email')->get();
+    }
+
+    public static function pageUser(){
+        return User::select('id', 'name', 'email')->paginate(5);
+    }
+
+    public static function logoutUser($request){
+        User::where('token', '=', $request['token'])
+            ->update([
+                'token' => null,
+                'token_expire' => null,
+            ]);
+    }
 
     public static function insertUser($data){
         User::insert([
@@ -41,7 +64,7 @@ class User extends Authenticatable
     
     public static function show($id)
     {
-        $user = User::find($id);
+        $user = User::where('id', '=', $id)->select('id', 'name', 'email')->get();
         return $user;
     }
 
@@ -112,8 +135,7 @@ class User extends Authenticatable
             return false;
         }
         else{
-            
-            return response()->json(['error'=>'Loi xac thuc nguoi dung'],401);
+            return response()->json(['error'=>'Loi xac thuc nguoi dung'],201);
         }
         
         
@@ -123,11 +145,16 @@ class User extends Authenticatable
 
     public function search($query)
     {
-        $user = User::where('name','like',"%{$query}%")                       
+        $user = User::where('name','like',"%{$query}%")                      
                         ->orWhere('email','like',"%{$query}%")
-                        ->Select('name','email')
-                        ;
+                        ->Select('name','email');
         return $user;
+    }
+
+    public function checkToken($request)
+    {
+        $obj = User::where('token','=',$request['token'])->first();
+        return $obj;
     }
 
 }
