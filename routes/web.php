@@ -13,3 +13,7 @@
 Route::get('/',function(){
     echo "hello api";
 });
+
+Route::get('/reset-pass/{token}/{email}','UserController@phuResetLink')->name('reset-link');
+Route::post('/do-reset','UserController@do_reset')->name('do-reset');
+

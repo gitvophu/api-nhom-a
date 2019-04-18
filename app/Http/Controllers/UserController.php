@@ -4,38 +4,82 @@ namespace App\Http\Controllers;
 
 use App\User;
 
-use Illuminate\Support\Arr;
-
 use CURLFile;
+
+use App\Mail\TestEmail;
+use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use Laravel\Passport\HasApiTokens;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
+
 class UserController extends Controller
 {
     protected $obj_user ;
     function __construct(){
         $this->obj_user = new User();
     }
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::all();
-        return response()->json(['List User' => $users], 200);
+        $validator = Validator::make($request->all(), [
+            'token' => 'required',
+        ], [
+            'token.required' => 'The token field is required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => 401, 'error' => $validator->errors()], 401);
+        }
+        $check = User::checkToken_P($request->all());
+        //var_dump($user);die();
+        if ($check == true) {
+            $users = User::showAllUser();
+            return response()->json(['status' => 200, 'List User' => $users], 200);
+        }else{
+            return response()->json(['status' => 401, 'error' => 'Account has not been verified'], 401);
+        }
     }
 
     public function paging(Request $request)
     {
-        $users = User::paginate(3);
-        return $users;
-    }
-    public function showUser($id)
-    {
-        $user = new User();
-        $obj = $user->show($id);
-        if($obj){
-            return response()->json(['Success' => $obj], 200);
+        $validator = Validator::make($request->all(),[
+            'token' => 'required',
+        ],[
+            'token.required' => 'The token field is required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => 401, 'error' => $validator->errors()], 401);
         }
-        return response()->json(['Fail' => 'Không tìm thấy User'], 201);
+        $check = User::checkToken_P($request->all());
+        if($check == true){
+            $users = User::pageUser();
+            return response()->json(['status' => 206, 'List User' => $users], 206);
+        }else{
+            return response()->json(['status' => 401, 'error' => 'Account has not been verified'], 401);
+        }
+    }
+    public function showUser(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(),[
+            'token' => 'required',
+        ],[
+            'token.required' => 'The token field is required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => 401, 'error' => $validator->errors()], 401);
+        }
+        $check = User::checkToken_P($request->all());
+        if($check == true){
+            $user = new User();
+            $obj = $user->show($id);
+            if($obj){
+                return response()->json(['status' => 200, 'User' => $obj], 200);
+            }else{
+                return response()->json(['status' => 201, 'Fail' => 'Find not User'], 201);
+            }
+        }else{
+            return response()->json(['status' => 401, 'error' => 'Account has not been verified'], 401);
+        }
 
     }
 
@@ -63,20 +107,21 @@ class UserController extends Controller
     }
     public function logoutUser(Request $request)
     {
-        $input = $request->input('token');
-        $user = User::where('token', '=', $input)
-            ->update([
-               'token' => null,
-               'token_expire' => null,
-            ]);
-        if ($user){
-            return response()->json([
-                'message' => "logout success"
-            ], 200);
+        $validator = Validator::make($request->all(),[
+            'token' => 'required',
+        ],[
+            'token.required' => 'The token field is required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => 401, 'error' => $validator->errors()], 401);
         }
-        return response()->json([
-            'message' => "Unauthorized user"
-        ], 401);
+        $check = User::checkToken_P($request->all());
+        if($check == true){
+            User::logoutUser($request->all());
+            return response()->json(['status' => 200, 'message' => "Logout success"], 200);
+        }else{
+            return response()->json(['status' => 401, 'message' => "Unauthorized user"], 401);
+        }
     }
 
     public function search(Request $request)
@@ -128,13 +173,13 @@ class UserController extends Controller
         // dd($request->all());
         $user_id = User::find($id);
         $validator = Validator::make($request->all(),[
-            'name' => 'required',
+            'name' => 'required|min:2',
             'token'=>'required'
-
         ]);
-        // if($validator->fails()){
-        //     return response()->json(['error' => 'fail'],400);
-        // }
+        if($validator->fails()){
+
+            return response()->json($validator->errors(),400);
+        }
         if ($request->token == null) {
             return response()->json(['error' => 'Loi xac thuc nguoi dung'],500);
            
@@ -236,28 +281,21 @@ class UserController extends Controller
         
     }
 
-    public function upload()
-    {
-        
-    }
-
     public function updateWithImage(Request $request){
         // dd($request->all());
         $validator = Validator::make($request->all(),[
             // 'name'=>'required',
             'email'=>'required',
             // 'phone'=>'required',
-            'image'=>'required',
+            'image'=>'required|image|mimes:jpeg,jpg,png,gif,svg|max:2048',
         ],[]);
         if ($validator->fails()) {
-            return response()->json(['error'=>'Tham so truyen vao con thieu'],201);
+            return response()->json($validator->errors(),201);
         }
         if ($request->token == null) {
             return response()->json(['error'=>'Loi xac thuc nguoi dung'],201);
         }
-        else{
-            
-        }
+       
         $rs = $this->obj_user->updateWithImage($request);
         if ($rs) {
             return response()->json(['success'=>'Cap nhat thanh cong'],200);
@@ -283,5 +321,61 @@ class UserController extends Controller
         $rs = curl_exec($request);
         curl_close($request);
         dd($rs);
+    }
+
+    function phuSendMail(Request $request){
+        $validator = Validator::make($request->all(),[
+            'email'=>'required|email',
+        ],[]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(),201);
+        }
+        $email = $request->email;
+        if ($email == null) {
+            return response()->json(['error'=>'Chua truyen email']);
+        }
+        $reset_pass_token = str_random(30);
+        $user = User::where('email',$email)->first();
+        if (!$user) {
+            return response()->json(['error'=>'Email ko ton tai']);
+        }
+        $user->reset_pass_token = $reset_pass_token;
+        $user->save();
+        $link = route('reset-link',['token'=>$reset_pass_token,'email'=>$email]);
+        // dd($link);
+        Mail::send('emails.reset_email', array(
+            'link'=> $link
+        ), function($message) use ($email){
+	        $message->to($email, 'User')->subject('Xin chào');
+	    });
+        
+        return response()->json(['success'=>'Gửi email thành công']);
+    }
+
+    function phuResetLink($token, $email){
+        $user = User::where('email',$email)->first();
+
+        if ($user->reset_pass_token == $token) {
+            return view("reset_form",compact('email'));
+        }
+        else{
+            echo "sai ";
+        }
+    }
+    function do_reset(Request $request){
+        $validator = Validator::make($request->all(),[
+            'email'=>'required|email',
+            'password'=>'required|min:6'
+        ],[]);
+        if ($validator->fails()) {
+            echo "Reset mật khẩu thất bại, lỗi dữ liệu truyền vào ko đúng ràng buộc";
+        }
+        $email = $request->email;
+        $password = $request->password;
+        $user = User::where('email',$email)->first();
+        $user->password = bcrypt($password);
+        $user->reset_pass_token = "";
+        $user->save();
+        echo "Reset mật khẩu thành công";
     }
 }
