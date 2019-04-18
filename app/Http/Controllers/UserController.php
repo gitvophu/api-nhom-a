@@ -183,12 +183,10 @@ class UserController extends Controller
             'token'=>'required'
         ]);
         if($validator->fails()){
-
             return response()->json($validator->errors(),400);
         }
         if ($request->token == null) {
             return response()->json(['error' => 'Loi xac thuc nguoi dung'],500);
-           
         }
         else{
             if ($user_id->token == $request->token) {
@@ -198,15 +196,12 @@ class UserController extends Controller
                 return response()->json(['error' => 'Loi xac thuc nguoi dung'],500);
             }
         }
-       
-        
-        
         $user_id->save();
         return response()->json(['success' => 'Cap nhat user thanh cong'],200);
     }
     public function changeUserPassword(Request $request, $id)
     {
-        // $user_id = User::find($id);
+         $user = User::find($id);
         // $validator = Validator::make($request->all(),[
         //     'name' => '',
         //     'password' => '',
