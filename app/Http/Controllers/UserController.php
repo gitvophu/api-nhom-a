@@ -206,65 +206,25 @@ class UserController extends Controller
     }
     public function changeUserPassword(Request $request, $id)
     {
-        // $user_id = User::find($id);
-        // $validator = Validator::make($request->all(),[
-        //     'name' => '',
-        //     'password' => '',
-        // ]);
-        // if($validator->fails()){
-        //     return response()->json(['error' => 'fail'],400);
-        // }
-        // $user_id->name = $request['name'];
-        // if($request->name == null)
-        // {
-        //     $user_id->name = $user_id->name;
-        // }else{
-        //     $user_id->name = $request['name'];
-        // }
-        // if($request->password == null)
-        // {
-        //     $user_id->password = $user_id->password;
-        // }else{
-        //     $user_id->password = bcrypt($request->password);
-        // }
-        if($request->password != null)
-        {            
-            if($request->name != null)
-            {
-                $validator = Validator::make($request->all(),
-                    [
-                        'name' => 'required|min:3',
-                        'password' => 'required|min:6'
-                    ]
-                );
-                if ($validator->fails()) {
-                    return response()->json(['error' => $validator, 'status' => 401], 401);
-                }
-                else {
-                    User::updateUserChangeName_Password($request->all(), $id);
-                    return response()->json(['success' => 'Update name, password success', 'status' => 200], 200);
-                }
-            }
-            else {
-                $validator = Validator::make($request->all(),
-                    [
-                        'password' => 'required|min:6'
-                    ]
-                );
-                if ($validator->fails()) {
-                    return response()->json(['error' => $validator, 'status' => 401], 401);
-                }
-                else {
-                    User::updateUserChangePassword($request->all(), $id);
-                    return response()->json(['success' => 'Update password success', 'status' => 200], 200);
-                }
-            }
+        $user = User::show($id);
+        
+        $validator = Validator::make($request->all(),
+            [
+                'password' => 'required|min:6',
+                'token' => 'required',
+            ],
+            [
+                'password.required' => 'Mật khẩu quá ngắn',
+                'token.required' => 'Yêu cầu xác thực người dùng'
+            ]
+        );
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors(), 'status' => 400], 400);
         }
         if($user->token != $request->token)
         {
             return response()->json(['error' => 'Unauthorized user', 'status' => 401], 401);
         }
-        User::updateUserChangePassword($request->all(), $id);
         return response()->json(['success' => 'Update password success', 'status' => 200], 200);
     }
 
