@@ -81,23 +81,17 @@ class UserController extends Controller
 
     public function search(Request $request)
     {
-        $validator = Validator::make($request->all(),[
-            'key' => '',
-            'token'=>'required',
-        ],
-        [
-            'token' => 'Unauthorized user',
-        ]);
         $a = new User();
-        $user_id = $a->checkToken($request->all()); //User::where('token','=',$request->token)->get();
-        if($request->token == null)
+        if($request->token != null)
         {
-            return response()->json(['error' => $validator->errors(), 'Unauthorized user' => 401], 401); 
-        }else
-        {
+            $user_id = $a->checkToken($request->all());
             $user = new User();
             $obj = $user->search($request->key)->paginate(2);
             return response()->json(['success' => $obj], 200);
+            
+        }else
+        {
+            return response()->json(['error' => 'Unauthorized user','status' => 401], 401); 
         }
     }
     public function createUser(Request $request)
@@ -225,20 +219,19 @@ class UserController extends Controller
 
     public function deleteUser(Request $request,$id)
     {
-        $input = $request->get('token');
-        $user_admin = User::where('token','=',$request->token)->first();
-        if($input != null)
-        {
+        $user = new User();
+        if($request->token != null)
+        {       
+            $user_admin = $user->checkToken($request->all());
             if($user_admin['role'] == 0)
             {
-                $user = new User();
                 $obj = $user->deleteuser($id);
                 return response()->json(['success' => 'delete success'], 200);
             }else {
-                return response()->json(['error' => 'Admin moi xoa duoc'], 404);
+                return response()->json(['error' => 'You must be Admin to delete user'], 404);
             }
         }else{
-                return response()->json(['error' => 'Unauthorized user'], 206);       
+                return response()->json(['error' => 'Unauthorized user'], 406);       
         }
         
     }
