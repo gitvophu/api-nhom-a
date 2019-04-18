@@ -126,23 +126,17 @@ class UserController extends Controller
 
     public function search(Request $request)
     {
-        $validator = Validator::make($request->all(),[
-            'key' => '',
-            'token'=>'required',
-        ],
-        [
-            'token' => 'Unauthorized user',
-        ]);
         $a = new User();
-        $user_id = $a->checkToken($request->all()); //User::where('token','=',$request->token)->get();
-        if($request->token == null)
+        if($request->token != null)
         {
-            return response()->json(['error' => $validator->errors(), 'Unauthorized user' => 401], 401); 
-        }else
-        {
+            $user_id = $a->checkToken($request->all());
             $user = new User();
             $obj = $user->search($request->key)->paginate(2);
             return response()->json(['success' => $obj], 200);
+            
+        }else
+        {
+            return response()->json(['error' => 'Unauthorized user','status' => 401], 401); 
         }
     }
     public function createUser(Request $request)
@@ -183,10 +177,12 @@ class UserController extends Controller
             'token'=>'required'
         ]);
         if($validator->fails()){
+
             return response()->json($validator->errors(),400);
         }
         if ($request->token == null) {
             return response()->json(['error' => 'Loi xac thuc nguoi dung'],500);
+           
         }
         else{
             if ($user_id->token == $request->token) {
@@ -196,64 +192,28 @@ class UserController extends Controller
                 return response()->json(['error' => 'Loi xac thuc nguoi dung'],500);
             }
         }
+       
+        
+        
         $user_id->save();
         return response()->json(['success' => 'Cap nhat user thanh cong'],200);
     }
     public function changeUserPassword(Request $request, $id)
     {
-         $user = User::find($id);
-        // $validator = Validator::make($request->all(),[
-        //     'name' => '',
-        //     'password' => '',
-        // ]);
-        // if($validator->fails()){
-        //     return response()->json(['error' => 'fail'],400);
-        // }
-        // $user_id->name = $request['name'];
-        // if($request->name == null)
-        // {
-        //     $user_id->name = $user_id->name;
-        // }else{
-        //     $user_id->name = $request['name'];
-        // }
-        // if($request->password == null)
-        // {
-        //     $user_id->password = $user_id->password;
-        // }else{
-        //     $user_id->password = bcrypt($request->password);
-        // }
-        if($request->password != null)
-        {            
-            if($request->name != null)
-            {
-                $validator = Validator::make($request->all(),
-                    [
-                        'name' => 'required|min:3',
-                        'password' => 'required|min:6'
-                    ]
-                );
-                if ($validator->fails()) {
-                    return response()->json(['error' => $validator, 'status' => 401], 401);
-                }
-                else {
-                    User::updateUserChangeName_Password($request->all(), $id);
-                    return response()->json(['success' => 'Update name, password success', 'status' => 200], 200);
-                }
-            }
-            else {
-                $validator = Validator::make($request->all(),
-                    [
-                        'password' => 'required|min:6'
-                    ]
-                );
-                if ($validator->fails()) {
-                    return response()->json(['error' => $validator, 'status' => 401], 401);
-                }
-                else {
-                    User::updateUserChangePassword($request->all(), $id);
-                    return response()->json(['success' => 'Update password success', 'status' => 200], 200);
-                }
-            }
+        $user = User::checkToken($request->all());
+        
+        $validator = Validator::make($request->all(),
+            [
+                'password' => 'required|min:6',
+                'token' => 'required',
+            ],
+            [
+                'password.required' => 'Mật khẩu quá ngắn',
+                'token.required' => 'Yêu cầu xác thực người dùng'
+            ]
+        );
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors(), 'status' => 400], 400);
         }
         if($user->token != $request->token)
         {
@@ -265,20 +225,19 @@ class UserController extends Controller
 
     public function deleteUser(Request $request,$id)
     {
-        $input = $request->get('token');
-        $user_admin = User::where('token','=',$request->token)->first();
-        if($input != null)
-        {
+        $user = new User();
+        if($request->token != null)
+        {       
+            $user_admin = $user->checkToken($request->all());
             if($user_admin['role'] == 0)
             {
-                $user = new User();
                 $obj = $user->deleteuser($id);
                 return response()->json(['success' => 'delete success'], 200);
             }else {
-                return response()->json(['error' => 'Admin moi xoa duoc'], 404);
+                return response()->json(['error' => 'You must be Admin to delete user'], 404);
             }
         }else{
-                return response()->json(['error' => 'Unauthorized user'], 206);       
+                return response()->json(['error' => 'Unauthorized user'], 406);       
         }
         
     }
