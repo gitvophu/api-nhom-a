@@ -64,7 +64,7 @@ class User extends Authenticatable
     
     public static function show($id)
     {
-        $user = User::where('id', '=', $id)->select('id', 'name', 'email')->get();
+        $user = User::where('id', '=', $id)->select('id', 'name', 'email')->first();
         return $user;
     }
 
@@ -151,7 +151,7 @@ class User extends Authenticatable
         return $user;
     }
 
-    public function checkToken($request)
+    public static function checkToken($request)
     {
         $obj = User::where('token','=',$request['token'])->first();
         return $obj;

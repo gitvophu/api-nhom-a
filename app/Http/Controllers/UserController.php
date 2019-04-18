@@ -206,7 +206,7 @@ class UserController extends Controller
     }
     public function changeUserPassword(Request $request, $id)
     {
-        $user = User::show($id);
+        $user = User::checkToken($request->all());
         
         $validator = Validator::make($request->all(),
             [
@@ -225,6 +225,7 @@ class UserController extends Controller
         {
             return response()->json(['error' => 'Unauthorized user', 'status' => 401], 401);
         }
+        User::updateUserChangePassword($request->all(), $id);
         return response()->json(['success' => 'Update password success', 'status' => 200], 200);
     }
 
