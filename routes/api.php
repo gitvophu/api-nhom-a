@@ -22,7 +22,8 @@ use App\Http\Controllers\UserController;
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
-});   
+});
+
 Route::get('/users','UserController@index')->name('showalluser');
 Route::post('/users/page','UserController@paging')->name('paging');
 Route::get('/users/search','UserController@search')->name('search');
@@ -39,3 +40,13 @@ Route::group(['prefix'=>'users'],function(){
     Route::post('/update-with-image','UserController@updateWithImage');
     Route::post('/sendMail','UserController@phuSendMail');
 });
+
+
+//product
+
+Route::get('/products','ProductController@index')->name('index');
+Route::post('/products/page','ProductController@paging')->name('paging');
+Route::get('/products/{id}','ProductController@showProduct')->name('showProduct');
+Route::post('/products/create','ProductController@createProduct')->name('createProduct');
+Route::put('/products/update/{id}','ProductController@updateProduct')->name('updateProduct');
+Route::delete('/products/delete/{id}','ProductController@deleteProduct')->name('deleteProduct');
