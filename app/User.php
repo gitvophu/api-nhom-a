@@ -30,7 +30,7 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
-     public static function checkToken_P($request){
+     public function checkToken_P($request){
         $user = User::where('token', '=', $request['token'])->first();
         if ($user){
             return true;
@@ -38,15 +38,15 @@ class User extends Authenticatable
         return false;
     }
 
-    public static function showAllUser(){
+    public function showAllUser(){
         return User::select('id', 'name', 'email')->get();
     }
 
-    public static function pageUser(){
+    public function pageUser(){
         return User::select('id', 'name', 'email')->paginate(5);
     }
 
-    public static function logoutUser($request){
+    public function logoutUser($request){
         User::where('token', '=', $request['token'])
             ->update([
                 'token' => null,
@@ -54,7 +54,7 @@ class User extends Authenticatable
             ]);
     }
 
-    public static function insertUser($data){
+    public  function insertUser($data){
         User::insert([
             'name'=>$data['name'],
             'email'=>$data['email'],
@@ -62,7 +62,7 @@ class User extends Authenticatable
         ]);
     }
     
-    public static function show($id)
+    public function show($id)
     {
         $user = User::where('id', '=', $id)->select('id', 'name', 'email')->first();
         return $user;
@@ -88,7 +88,7 @@ class User extends Authenticatable
         $user->delete();
     }    
     
-    public static function updateUserChangePassword($data, $id){
+    public function updateUserChangePassword($data, $id){
         User::where('id', $id)
         ->where('token', $data['token'])
         ->update([
@@ -96,7 +96,7 @@ class User extends Authenticatable
         ]);
     }
 
-    public static function updateUserChangeName_Password($data, $id){
+    public function updateUserChangeName_Password($data, $id){
         User::where('id', $id)
         ->update([
             'name' => $data['name'],
@@ -104,7 +104,7 @@ class User extends Authenticatable
         ]);
     }
 
-    public static function updateUserNoChangePassword($data, $id){
+    public  function updateUserNoChangePassword($data, $id){
         User::where('id', $id)
         ->update([
             'name' => $data['name'],
@@ -151,7 +151,7 @@ class User extends Authenticatable
         return $user;
     }
 
-    public static function checkToken($request)
+    public function checkToken($request)
     {
         $obj = User::where('token','=',$request['token'])->first();
         return $obj;

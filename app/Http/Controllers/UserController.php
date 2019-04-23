@@ -13,13 +13,14 @@ use Laravel\Passport\HasApiTokens;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-
+use App\Http\Requests\ValidatorAPI;
 class UserController extends Controller
 {
     protected $obj_user ;
     function __construct(){
         $this->obj_user = new User();
     }
+    
     public function index(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -30,10 +31,9 @@ class UserController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => 401, 'error' => $validator->errors()], 401);
         }
-        $check = User::checkToken_P($request->all());
-        //var_dump($user);die();
+        $check = $this->obj_user->checkToken_P($request->all());
         if ($check == true) {
-            $users = User::showAllUser();
+            $users = $this->obj_user->showAllUser();
             return response()->json(['status' => 200, 'List User' => $users], 200);
         }else{
             return response()->json(['status' => 401, 'error' => 'Account has not been verified'], 401);
@@ -50,9 +50,9 @@ class UserController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => 401, 'error' => $validator->errors()], 401);
         }
-        $check = User::checkToken_P($request->all());
+        $check =$this->obj_user->checkToken_P($request->all());
         if($check == true){
-            $users = User::pageUser();
+            $users = $this->obj_user->pageUser();
             return response()->json(['status' => 206, 'List User' => $users], 206);
         }else{
             return response()->json(['status' => 401, 'error' => 'Account has not been verified'], 401);
@@ -68,10 +68,9 @@ class UserController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => 401, 'error' => $validator->errors()], 401);
         }
-        $check = User::checkToken_P($request->all());
+        $check = $this->obj_user->checkToken_P($request->all());
         if($check == true){
-            $user = new User();
-            $obj = $user->show($id);
+            $obj = $this->obj_user->show($id);
             if($obj){
                 return response()->json(['status' => 200, 'User' => $obj], 200);
             }else{
@@ -94,7 +93,7 @@ class UserController extends Controller
             return response()->json(['error' => $validator->errors(), 'fails' => 401], 401);            
         }
         if(Auth::attempt($input)){
-            $user = \auth()->user();//lấy chính nó
+            $user = \auth()->user();
             $user->token = str_random(32);
             $user->token_expire = strtotime('1 days');
             $user->save();
@@ -115,9 +114,9 @@ class UserController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => 401, 'error' => $validator->errors()], 401);
         }
-        $check = User::checkToken_P($request->all());
+        $check = $this->obj_user->checkToken_P($request->all());
         if($check == true){
-            User::logoutUser($request->all());
+            $this->obj_user->logoutUser($request->all());
             return response()->json(['status' => 200, 'message' => "Logout success"], 200);
         }else{
             return response()->json(['status' => 401, 'message' => "Unauthorized user"], 401);
@@ -126,12 +125,10 @@ class UserController extends Controller
 
     public function search(Request $request)
     {
-        $a = new User();
         if($request->token != null)
         {
-            $user_id = $a->checkToken($request->all());
-            $user = new User();
-            $obj = $user->search($request->key)->paginate(2);
+            $user_id = $this->obj_user->checkToken($request->all());
+            $obj = $this->obj_user->search($request->key)->paginate(2);
             return response()->json(['success' => $obj], 200);
             
         }else
@@ -156,7 +153,7 @@ class UserController extends Controller
         if ($validator->fails()) { 
             return response()->json(['error' => $validator->errors(), 'status' => 400], 400);            
         }
-        $user = User::createByToken($request->all());
+        $user = $this->obj_user->createByToken($request->all());
         if(!$user){
             return response()->json(['error' => 'Unauthorized user', 'status' => 401], 401);
         }
@@ -171,7 +168,7 @@ class UserController extends Controller
     public function updateUser(Request $request, $id)
     {
         // dd($request->all());
-        $user_id = User::find($id);
+        $user_id = $this->obj_user->find($id);
         $validator = Validator::make($request->all(),[
             'name' => 'required|min:2',
             'token'=>'required'
@@ -200,7 +197,7 @@ class UserController extends Controller
     }
     public function changeUserPassword(Request $request, $id)
     {
-        $user = User::checkToken($request->all());
+        $user = $this->obj_user->checkToken($request->all());
         
         $validator = Validator::make($request->all(),
             [
@@ -219,19 +216,18 @@ class UserController extends Controller
         {
             return response()->json(['error' => 'Unauthorized user', 'status' => 401], 401);
         }
-        User::updateUserChangePassword($request->all(), $id);
+        $this->obj_user->updateUserChangePassword($request->all(), $id);
         return response()->json(['success' => 'Update password success', 'status' => 200], 200);
     }
 
     public function deleteUser(Request $request,$id)
     {
-        $user = new User();
         if($request->token != null)
         {       
-            $user_admin = $user->checkToken($request->all());
+            $user_admin = $this->obj_user->checkToken($request->all());
             if($user_admin['role'] == 0)
             {
-                $obj = $user->deleteuser($id);
+                $obj = $this->obj_user->deleteuser($id);
                 return response()->json(['success' => 'delete success'], 200);
             }else {
                 return response()->json(['error' => 'You must be Admin to delete user'], 404);
@@ -296,7 +292,7 @@ class UserController extends Controller
             return response()->json(['error'=>'Chua truyen email']);
         }
         $reset_pass_token = str_random(30);
-        $user = User::where('email',$email)->first();
+        $user = $this->obj_user->where('email',$email)->first();
         if (!$user) {
             return response()->json(['error'=>'Email ko ton tai']);
         }
@@ -314,7 +310,7 @@ class UserController extends Controller
     }
 
     function phuResetLink($token, $email){
-        $user = User::where('email',$email)->first();
+        $user = $this->obj_user->where('email',$email)->first();
 
         if ($user->reset_pass_token == $token) {
             return view("reset_form",compact('email'));
