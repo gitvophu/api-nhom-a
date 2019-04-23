@@ -55,5 +55,23 @@ class DatabaseSeeder extends Seeder
             'role' => (1),
         ]);
 
+        //product
+        DB::table('products')->insert([
+            'name' => 'product 1',
+            'price' => '100000',
+            'desciption' => 'test san pham 1',
+        ]);
+
+        DB::table('products')->insert([
+            'name' => 'product 2',
+            'price' => '100000',
+            'desciption' => 'test san pham 2',
+        ]);
+        DB::table('products')->insert([
+            'name' => 'product 3',
+            'price' => '100000',
+            'desciption' => 'test san pham 3',
+        ]);
+
     }
 }
