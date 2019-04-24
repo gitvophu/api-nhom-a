@@ -16,15 +16,15 @@ class CreateUsersTable extends Migration
         // Email, Họ tên, Điện thoại, Mật khẩu mã hóa, thời điểm đăng ký
         Schema::create('users', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name',100);
-            $table->string('image',100);
+            $table->string('name',100)->nullable();
+            $table->string('image',100)->nullable();
             $table->string('email',100)->unique();
-            $table->string('password',100);
-            $table->string('token',100);
-            $table->string('reset_pass_token',100);
-            $table->integer('token_expire');
-            $table->integer('token_status');
-            $table->integer('role');
+            $table->string('password',100)->nullable();
+            $table->string('token',100)->nullable();
+            $table->string('reset_pass_token',100)->nullable();
+            $table->integer('token_expire')->nullable();
+            $table->integer('token_status')->nullable();
+            $table->integer('role')->nullable();
 
             $table->rememberToken();
             $table->timestamps();

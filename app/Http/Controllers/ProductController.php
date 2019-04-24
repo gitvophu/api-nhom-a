@@ -12,12 +12,15 @@ namespace App\Http\Controllers;
 use App\Http\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-
+use App\Http\Validator\ProductValidator;
 class ProductController extends Controller
 {
-    protected $obj_product ;
+    protected $obj_product;
+    protected $obj_validator;
     function __construct(){
         $this->obj_product = new Product();
+        // validators
+        $this->obj_validator = new ProductValidator();
     }
 
     public function index()
@@ -44,22 +47,28 @@ class ProductController extends Controller
 
     public function createProduct(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'price' => 'required|numeric',
-            'desciption' => 'required',
-        ],
-            [
-                'name.required' => 'Chưa nhập tên',
-                'price.required' => 'Chưa nhập giá',
-                'price.numeric' => 'Giá phải nhập số',
-                'desciption.required' => 'Chưa nhập nội dung',
-            ]);
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors(), 'status' => 400], 400);
+
+//        $validator = Validator::make($request->all(), [
+//            'name' => 'required',
+//            'price' => 'required|numeric',
+//            'desciption' => 'required',
+//        ],
+//            [
+//                'name.required' => 'Chưa nhập tên',
+//                'price.required' => 'Chưa nhập giá',
+//                'price.numeric' => 'Giá phải nhập số',
+//                'desciption.required' => 'Chưa nhập nội dung',
+//            ]);
+//        if ($validator->fails()) {
+//            return response()->json(['error' => $validator->errors(), 'status' => 400], 400);
+//        }
+        if ($this->obj_validator->validate($request->all())){
+            $this->obj_product->insertProduct($request->all());
+            return response()->json(['success' => 'create success', 'status' => 200], 200);
+        }else{
+            return response()->json(['error' => $this->obj_validator->errors(), 'status' => 400], 400);
         }
-        $this->obj_product->insertProduct($request->all());
-        return response()->json(['success' => 'create success', 'status' => 200], 200);
+
     }
 
     public function updateProduct(Request $request, $id){
