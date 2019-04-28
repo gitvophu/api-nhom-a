@@ -261,24 +261,24 @@ class UserController extends Controller
             return response()->json(['error'=>'Email ko ton tai, ko tim thay user'],201);
         }
     }
-    public function send_upload(Request $request){
-        // dd($_FILES['image']['tmp_name']);
-        $request = curl_init();
-        $_token = csrf_token();
-        curl_setopt($request,CURLOPT_URL,'http://127.0.0.1:9000/api/users/update-with-image');
-        curl_setopt($request,CURLOPT_POST,true);
+    // public function send_upload(Request $request){
+    //     // dd($_FILES['image']['tmp_name']);
+    //     $request = curl_init();
+    //     $_token = csrf_token();
+    //     curl_setopt($request,CURLOPT_URL,'http://127.0.0.1:9000/api/users/update-with-image');
+    //     curl_setopt($request,CURLOPT_POST,true);
         
-        $cfile = new CURLFile($_FILES['image']['tmp_name'],$_FILES['image']['type'],$_FILES['image']['name']);
-        curl_setopt($request,CURLOPT_POSTFIELDS,[
-            // '_token'=>$_token,
-            // 'image'=>'@'.$_FILES['image']['tmp_name'],
-            // 'image_name'=>$_FILES['image']['name']
-            'image'=>$cfile
-        ]);
-        $rs = curl_exec($request);
-        curl_close($request);
-        dd($rs);
-    }
+    //     $cfile = new CURLFile($_FILES['image']['tmp_name'],$_FILES['image']['type'],$_FILES['image']['name']);
+    //     curl_setopt($request,CURLOPT_POSTFIELDS,[
+    //         // '_token'=>$_token,
+    //         // 'image'=>'@'.$_FILES['image']['tmp_name'],
+    //         // 'image_name'=>$_FILES['image']['name']
+    //         'image'=>$cfile
+    //     ]);
+    //     $rs = curl_exec($request);
+    //     curl_close($request);
+    //     dd($rs);
+    // }
 
     function phuSendMail(Request $request){
         $validator = Validator::make($request->all(),[

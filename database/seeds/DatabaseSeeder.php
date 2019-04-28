@@ -73,5 +73,19 @@ class DatabaseSeeder extends Seeder
             'desciption' => 'test san pham 3',
         ]);
 
+        //images
+        DB::table('images')->insert([
+            'name' => 'image1.jpg',
+            'product_id' => '1',
+        ]);
+        DB::table('images')->insert([
+            'name' => 'image2.jpg',
+            'product_id' => '1',
+        ]);
+        DB::table('images')->insert([
+            'name' => 'image3.jpg',
+            'product_id' => '2',
+        ]);
+
     }
 }

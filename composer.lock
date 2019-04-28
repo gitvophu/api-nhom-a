@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0d1de46d329366522ece5e67dcf835cd",
+    "content-hash": "fcc580e4cb4c3e7fb35ed7c046cc6e24",
     "packages": [
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -517,6 +517,70 @@
             "time": "2019-03-30T13:22:34+00:00"
         },
         {
+            "name": "league/fractal",
+            "version": "0.17.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/thephpleague/fractal.git",
+                "reference": "a0b350824f22fc2fdde2500ce9d6851a3f275b0e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/thephpleague/fractal/zipball/a0b350824f22fc2fdde2500ce9d6851a3f275b0e",
+                "reference": "a0b350824f22fc2fdde2500ce9d6851a3f275b0e",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4"
+            },
+            "require-dev": {
+                "doctrine/orm": "^2.5",
+                "illuminate/contracts": "~5.0",
+                "mockery/mockery": "~0.9",
+                "pagerfanta/pagerfanta": "~1.0.0",
+                "phpunit/phpunit": "~4.0",
+                "squizlabs/php_codesniffer": "~1.5",
+                "zendframework/zend-paginator": "~2.3"
+            },
+            "suggest": {
+                "illuminate/pagination": "The Illuminate Pagination component.",
+                "pagerfanta/pagerfanta": "Pagerfanta Paginator",
+                "zendframework/zend-paginator": "Zend Framework Paginator"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "0.13-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "League\\Fractal\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Phil Sturgeon",
+                    "email": "me@philsturgeon.uk",
+                    "homepage": "http://philsturgeon.uk/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Handle the output of complex data structures ready for API output.",
+            "homepage": "http://fractal.thephpleague.com/",
+            "keywords": [
+                "api",
+                "json",
+                "league",
+                "rest"
+            ],
+            "time": "2017-06-12T11:04:56+00:00"
+        },
+        {
             "name": "monolog/monolog",
             "version": "1.24.0",
             "source": {
@@ -835,16 +899,16 @@
         },
         {
             "name": "phuvo/package-api",
-            "version": "v1.0",
+            "version": "v1.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/gitvophu/package-api.git",
-                "reference": "39460ed77faeffa967ce6d8e4558384c66fd6ca4"
+                "reference": "ed9c2dfe8d6c5aae927b8e72c12ffbfa38e89014"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gitvophu/package-api/zipball/39460ed77faeffa967ce6d8e4558384c66fd6ca4",
-                "reference": "39460ed77faeffa967ce6d8e4558384c66fd6ca4",
+                "url": "https://api.github.com/repos/gitvophu/package-api/zipball/ed9c2dfe8d6c5aae927b8e72c12ffbfa38e89014",
+                "reference": "ed9c2dfe8d6c5aae927b8e72c12ffbfa38e89014",
                 "shasum": ""
             },
             "type": "library",
@@ -862,7 +926,7 @@
                 }
             ],
             "description": "package api",
-            "time": "2019-04-22T15:26:56+00:00"
+            "time": "2019-04-24T01:03:38+00:00"
         },
         {
             "name": "psr/log",

@@ -15,7 +15,7 @@ class Product extends Model
 
     public function show($id)
     {
-        return Product::where('id', '=', $id)->first();
+        return Product::where('id', '=', $id)->first()->toArray();
     }
 
     public function pageProduct(){

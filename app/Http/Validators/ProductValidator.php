@@ -5,6 +5,7 @@
  * Date: 4/22/2019
  * Time: 3:28 PM
  */
+namespace App\Http\Validators;
 use Event;
 use App\Http\Models\Product;
 use Illuminate\Support\MessageBag as MessageBag;
