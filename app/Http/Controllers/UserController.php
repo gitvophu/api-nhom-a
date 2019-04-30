@@ -142,12 +142,14 @@ class UserController extends Controller
             'name' => 'required|min:3',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6',
+            'role' => 'required',
             'token' => 'required'
         ],
         [
             'name.required' => 'Chưa nhập tên',
             'email.required' => 'Email không hợp lệ',
             'password.required' => 'Mật khẩu quá ngắn',
+            'role.required' => 'Chọn quyền cho tài khoản',
             'token.required' => 'Yeu cau xac thuc nguoi dung'
         ]);
         if ($validator->fails()) { 
@@ -157,10 +159,11 @@ class UserController extends Controller
         if(!$user){
             return response()->json(['error' => 'Unauthorized user', 'status' => 401], 401);
         }
-        if (intval($user['role']) != 0){
+        if (intval($user['role']) != -1){
             return response()->json(['error' => 'Can not create an object because you do not have permission.', 'status' => 401], 401);
         }
         $input = $request->all();
+        //dd($request->all());
         $input['password'] = bcrypt($input['password']);
         $user_ = $user->create($input);
         return response()->json(['success'=> 'create success', 'status' => 201], 201);
@@ -171,27 +174,22 @@ class UserController extends Controller
         $user_id = $this->obj_user->find($id);
         $validator = Validator::make($request->all(),[
             'name' => 'required|min:2',
-            'token'=>'required'
+            'token'=>'required',
+            'role' => ''
         ]);
         if($validator->fails()){
 
             return response()->json($validator->errors(),400);
         }
-        if ($request->token == null) {
-            return response()->json(['error' => 'Loi xac thuc nguoi dung'],500);
-           
-        }
-        else{
-            if ($user_id->token == $request->token) {
+        $check = $this->obj_user->checkToken($request->all());
+        if($check['role'] == -1)
+        {
                 $user_id->name = $request->name;
-            }
-            else{
-                return response()->json(['error' => 'Loi xac thuc nguoi dung'],500);
-            }
+                $user_id->role = $request->role;
+        }else
+        {
+            return response()->json(['error' => 'Loi xac thuc nguoi dung'],500);
         }
-       
-        
-        
         $user_id->save();
         return response()->json(['success' => 'Cap nhat user thanh cong'],200);
     }
@@ -225,7 +223,7 @@ class UserController extends Controller
         if($request->token != null)
         {       
             $user_admin = $this->obj_user->checkToken($request->all());
-            if($user_admin['role'] == 0)
+            if($user_admin['role'] == -1)
             {
                 $obj = $this->obj_user->deleteuser($id);
                 return response()->json(['success' => 'delete success'], 200);

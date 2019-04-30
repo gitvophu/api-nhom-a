@@ -39,11 +39,11 @@ class User extends Authenticatable
     }
 
     public function showAllUser(){
-        return User::select('id', 'name', 'email')->get();
+        return User::select('id', 'name', 'email','role')->get();
     }
 
     public function pageUser(){
-        return User::select('id', 'name', 'email')->paginate(5);
+        return User::select('id', 'name', 'email','role')->paginate(5);
     }
 
     public function logoutUser($request){
@@ -59,12 +59,13 @@ class User extends Authenticatable
             'name'=>$data['name'],
             'email'=>$data['email'],
             'password'=>bcrypt($data['password']),
+            
         ]);
     }
     
     public function show($id)
     {
-        $user = User::where('id', '=', $id)->select('id', 'name', 'email')->first();
+        $user = User::where('id', '=', $id)->select('id', 'name', 'email','role')->first();
         return $user;
     }
 
@@ -74,10 +75,11 @@ class User extends Authenticatable
             'name' => $user['name'],
             'email' =>$user['email'],
             'password' => $user['password'],
+            'role'=>$user['role'],
         ]);
     }
 
-    public static function createByToken($token)
+    public function createByToken($token)
     {
         return User::where('token', $token['token'])->first();
     }

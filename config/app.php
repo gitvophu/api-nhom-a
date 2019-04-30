@@ -177,7 +177,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         LaravelAcl\Authentication\AuthenticationServiceProvider::class,
-        Phuvo\Apinhoma\NhomAServiceProvider::class,
+        // Phuvo\Apinhoma\NhomAServiceProvider::class,
 
     ],
 
