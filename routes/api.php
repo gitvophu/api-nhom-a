@@ -58,3 +58,12 @@ Route::group(['prefix'=>'images'],function(){
     Route::delete('/delete/{id}','ImageController@delete');
     Route::post('/update','ImageController@update_image');
 });
+
+//user type
+
+Route::group(['prefix'=>'user_type'],function(){
+    Route::get('/','UserTypeController@index');
+    Route::post('/create','UserTypeController@create');
+    Route::put('/update/{id}','UserTypeController@edit');
+    Route::delete('/delete/{id}','UserTypeController@destroy');
+});
