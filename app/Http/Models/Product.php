@@ -10,12 +10,33 @@ class Product extends Model
     protected $primarykey = "id";
 
     public function showAllProduct(){
-        return Product::get();
+        return Product::select(
+            'products.id', 
+            'products.name', 
+            'products.price',
+            'products.description', 
+            'products.image', 
+            'product_categories.name as cate_name')
+            ->leftJoin('product_categories', 'products.cate_id', '=', 'product_categories.id')
+            ->get();
     }
 
     public function show($id)
     {
-        return Product::where('id', '=', $id)->first()->toArray();
+        $product = Product::select(
+            'products.id', 
+            'products.name', 
+            'products.price',
+            'products.description', 
+            'products.image', 
+            'product_categories.name as cate_name')
+            ->leftJoin('product_categories', 'products.cate_id', '=', 'product_categories.id')
+            ->where('products.id', '=', $id)
+            ->first();
+        if($product){
+            $product = $product->toArray();
+        }
+        return $product;
     }
 
     public function pageProduct(){

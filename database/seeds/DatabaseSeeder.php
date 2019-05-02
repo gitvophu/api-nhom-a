@@ -56,18 +56,21 @@ class DatabaseSeeder extends Seeder
         DB::table('products')->insert([
             'name' => 'product 1',
             'price' => '100000',
-            'desciption' => 'test san pham 1',
+            'description' => 'test san pham 1',
+            'cate_id' => 1,
         ]);
 
         DB::table('products')->insert([
             'name' => 'product 2',
             'price' => '100000',
-            'desciption' => 'test san pham 2',
+            'description' => 'test san pham 2',
+            'cate_id' => 2,
         ]);
         DB::table('products')->insert([
             'name' => 'product 3',
             'price' => '100000',
-            'desciption' => 'test san pham 3',
+            'description' => 'test san pham 3',
+            'cate_id' => 3,
         ]);
 
         //images
@@ -96,6 +99,18 @@ class DatabaseSeeder extends Seeder
 
         DB::table('user_type')->insert([
             'role' => 'student',
+        ]);
+
+        DB::table('product_categories')->insert([
+            'name' => 'Cate 1',
+        ]);
+
+        DB::table('product_categories')->insert([
+            'name' => 'Cate 2',
+        ]);
+
+        DB::table('product_categories')->insert([
+            'name' => 'Cate 3',
         ]);
 
     }

@@ -36,7 +36,8 @@ class ProductController extends Controller
                 $new_product = [
                     'id'=>$product['id'],
                     'name'=>$product['name'],
-                    'desciption'=>$product['desciption'],
+                    'description'=>$product['description'],
+                    'cate_name'=>$product['cate_name'],
                     'image'=>$product['image'],
                 ];
         return $new_product;
@@ -54,7 +55,8 @@ class ProductController extends Controller
                 $new_product = [
                     'id'=>$product['id'],
                     'name'=>$product['name'],
-                    'desciption'=>$product['desciption'],
+                    'description'=>$product['description'],
+                    'cate_name'=>$product['cate_name'],
                     'image'=>$product['image'],
                 ];
                 $new_products[] = $new_product;
@@ -81,12 +83,11 @@ class ProductController extends Controller
     public function showProduct($id)
     {
         $obj_product = $this->obj_product->show($id);
-        $obj_product = $this->transformProduct($obj_product);
-        if ($obj_product) {
-            return response()->json(['status' => 200, 'Product' => $obj_product], 200);
-        } else {
+        if (!$obj_product) {
             return response()->json(['status' => 201, 'Fail' => 'Find not Product'], 201);
         }
+        $obj_product = $this->transformProduct($obj_product);
+        return response()->json(['status' => 200, 'Product' => $obj_product], 200);
     }
 
     public function createProduct(Request $request)
@@ -95,13 +96,13 @@ class ProductController extends Controller
 //        $validator = Validator::make($request->all(), [
         //            'name' => 'required',
         //            'price' => 'required|numeric',
-        //            'desciption' => 'required',
+        //            'description' => 'required',
         //        ],
         //            [
         //                'name.required' => 'Chưa nhập tên',
         //                'price.required' => 'Chưa nhập giá',
         //                'price.numeric' => 'Giá phải nhập số',
-        //                'desciption.required' => 'Chưa nhập nội dung',
+        //                'description.required' => 'Chưa nhập nội dung',
         //            ]);
         //        if ($validator->fails()) {
         //            return response()->json(['error' => $validator->errors(), 'status' => 400], 400);
@@ -122,7 +123,7 @@ class ProductController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => '',
             'price' => 'numeric',
-            'desciption' => '',
+            'description' => '',
         ],
             [
                 'price.numeric' => 'Giá phải nhập số',
@@ -133,7 +134,7 @@ class ProductController extends Controller
 
         $name = $request->name;
         $price = $request->price;
-        $disciption = $request->desciption;
+        $disciption = $request->description;
 
         if ($product) {
             if ($name == null) {
@@ -143,7 +144,7 @@ class ProductController extends Controller
                 $price = $product->price;
             }
             if ($disciption == null) {
-                $disciption = $product->desciption;
+                $disciption = $product->description;
             }
             $input = [$name, $price, $disciption];
 
