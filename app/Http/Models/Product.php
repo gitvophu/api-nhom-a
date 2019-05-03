@@ -47,7 +47,8 @@ class Product extends Model
         Product::insert([
             'name'=>$data['name'],
             'price'=>$data['price'],
-            'desciption'=>$data['desciption'],
+            'description'=>$data['description'],
+            'cate_id'=>$data['cate_id'],
             'created_at' => date('Y-m-d H-i-s'),
         ]);
     }

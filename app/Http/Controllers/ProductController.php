@@ -9,6 +9,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\Product;
+use App\Http\Models\Product_Category;
 use App\Models\Image;
 use App\Transformers\ProductTransformer;
 use Illuminate\Http\Request;
@@ -19,11 +20,11 @@ class ProductController extends Controller
     protected $obj_product;
     protected $obj_validator;
     private $productTransform;
+    protected $obj_pro_cate;
     public function __construct(ProductTransformer $productTransform)
     {
         $this->obj_product = new Product();
-        // validators
-        // $this->obj_validator = new ProductValidator();
+        $this->obj_pro_cate = new Product_Category();
         $this->productTransform = $productTransform;
     }
     public function transformProduct($product)
@@ -92,28 +93,38 @@ class ProductController extends Controller
 
     public function createProduct(Request $request)
     {
-
-//        $validator = Validator::make($request->all(), [
-        //            'name' => 'required',
-        //            'price' => 'required|numeric',
-        //            'description' => 'required',
-        //        ],
-        //            [
-        //                'name.required' => 'Chưa nhập tên',
-        //                'price.required' => 'Chưa nhập giá',
-        //                'price.numeric' => 'Giá phải nhập số',
-        //                'description.required' => 'Chưa nhập nội dung',
-        //            ]);
-        //        if ($validator->fails()) {
-        //            return response()->json(['error' => $validator->errors(), 'status' => 400], 400);
-        //        }
-        if ($this->obj_validator->validate($request->all())) {
-            $this->obj_product->insertProduct($request->all());
-            return response()->json(['success' => 'create success', 'status' => 200], 200);
-        } else {
-            return response()->json(['error' => $this->obj_validator->errors(), 'status' => 400], 400);
+        $obj = $this->obj_pro_cate->getAllCategories();
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'price' => 'required|numeric',
+            'description' => 'required',
+            'cate_id' => 'required|numeric',
+        ],
+        [
+            'name.required' => 'Chưa nhập tên',
+            'price.required' => 'Chưa nhập giá',
+            'price.numeric' => 'Giá phải nhập số',
+            'description.required' => 'Chưa nhập nội dung',
+            'cate_id.required' => 'Chưa nhập loại sản phẩm',
+            'cate_id.numeric' => 'Định dạng không hợp lệ',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors(), 'status' => 400], 400);
         }
-
+        $flag = 0;
+        foreach($obj as $ob)
+        {
+            if($ob['id'] == intval($request['cate_id']))
+            {
+                $flag = 1;
+            }
+        }
+        if($flag == 0)
+        {
+            return response()->json(['error' => 'Không có loại sản phẩm ' . $request['cate_id'], 'status' => 400], 400);
+        }
+        $this->obj_product->insertProduct($request->all());
+        return response()->json(['success' => 'create success', 'status' => 200], 200);
     }
 
     public function updateProduct(Request $request, $id)
