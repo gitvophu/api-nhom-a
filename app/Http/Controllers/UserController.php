@@ -201,7 +201,6 @@ class UserController extends Controller
     }
     public function changeUserPassword(Request $request, $id)
     {
-        $user = $this->obj_user->checkToken($request->all());
         
         $validator = Validator::make($request->all(),
             [
