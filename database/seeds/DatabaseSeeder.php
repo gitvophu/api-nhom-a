@@ -17,39 +17,43 @@ class DatabaseSeeder extends Seeder
             'name' => 'Dieu My',
             'email' => 'truongdieumy97@gmail.com',
             'password' => bcrypt('123456'),
-            'role' => '-1',
+            'role' => 1,
         ]);
         DB::table('users')->insert([
             'name' => 'chan',
             'email' => 'chan@gmail.com',
             'password' => bcrypt('chan@gmail.com'),
-            'role' => '1',
+            'role' => 2,
         ]);
         DB::table('users')->insert([
             'name' => 'Nguyen C',
             'email' => 'nguyenc@gmail.com',
             'password' => bcrypt('nguyenc@gmail.com'),
-            'role' => '0',
+            'role' => 2,
         ]);
         DB::table('users')->insert([
             'name' => 'Vo Ngoc Phu',
             'email' => 'vongocphu04@gmail.com',
             'password' => bcrypt('vongocphu04@gmail.com'),
+            'role' => 2,
         ]);
         DB::table('users')->insert([
             'name' => 'Nguyen E',
             'email' => 'nguyene@gmail.com',
             'password' => bcrypt('nguyene@gmail.com'),
+            'role' => 2,
         ]);
         DB::table('users')->insert([
             'name' => 'Nguyen F',
             'email' => 'nguyenf@gmail.com',
             'password' => bcrypt('nguyenf@gmail.com'),
+            'role' => 2,
         ]);
         DB::table('users')->insert([
             'name' => 'Nguyen G',
             'email' => 'nguyeng@gmail.com',
             'password' => bcrypt('nguyeng@gmail.com'),
+            'role' => 2,
         ]);
 
         //product
@@ -89,16 +93,11 @@ class DatabaseSeeder extends Seeder
 
         //table user_type
         DB::table('user_type')->insert([
-            'role' => 'admin',
+            'name' => 'admin',
         ]);
 
         DB::table('user_type')->insert([
-            'role' => 'teacher',
-        ]);
-
-
-        DB::table('user_type')->insert([
-            'role' => 'student',
+            'name' => 'user',
         ]);
 
         DB::table('product_categories')->insert([

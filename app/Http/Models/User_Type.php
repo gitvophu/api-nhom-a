@@ -11,13 +11,13 @@ class User_Type extends Model
 
     public function showAllUser_Type()
     {
-        return User_Type::select('id','role')->get();
+        return User_Type::select('id','name')->get();
     }
 
     public function createUserType($data)
     {
         User_Type::insert([
-            'role' => $data['role'],
+            'name' => $data['name'],
         ]);
     }
 
@@ -26,7 +26,7 @@ class User_Type extends Model
     {
         User_Type::where('id',$id)
         ->update([
-            'role' => $data,
+            'name' => $data,
         ]);
     }
 

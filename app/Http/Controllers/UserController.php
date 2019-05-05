@@ -101,7 +101,7 @@ class UserController extends Controller
             return response()->json(['success' => $user], 200);
         } 
         else{ 
-            return response()->json(['error' => false], 401); 
+            return response()->json(['error' => 'Login fail'], 401); 
         }
     }
     public function logoutUser(Request $request)
@@ -127,9 +127,15 @@ class UserController extends Controller
     {
         if($request->token != null)
         {
-            $user_id = $this->obj_user->checkToken($request->all());
-            $obj = $this->obj_user->search($request->key)->paginate(2);
-            return response()->json(['success' => $obj], 200);
+            if($request->key != null)
+            {
+                $user_id = $this->obj_user->checkToken($request->all());
+                $obj = $this->obj_user->search($request->key)->paginate(2);
+                return response()->json(['success' => $obj], 200);
+            }
+            else {
+                return response()->json(['error' => 'Unauthorized user','status' => 401], 401); 
+            }
             
         }else
         {
@@ -147,10 +153,12 @@ class UserController extends Controller
         ],
         [
             'name.required' => 'Chưa nhập tên',
-            'email.required' => 'Email không hợp lệ',
-            'password.required' => 'Mật khẩu quá ngắn',
+            'name.min' => 'Tên quá ngắn',
+            'email.unique' => 'Email đã tồn tại',
+            'password.required' => 'Chưa nhập password',
+            'password.min' => 'Mật khẩu quá ngắn',
             'role.required' => 'Chọn quyền cho tài khoản',
-            'token.required' => 'Yeu cau xac thuc nguoi dung'
+            'token.required' => 'Yêu cầu xác thực người dùng'
         ]);
         if ($validator->fails()) { 
             return response()->json(['error' => $validator->errors(), 'status' => 400], 400);            
@@ -159,7 +167,7 @@ class UserController extends Controller
         if(!$user){
             return response()->json(['error' => 'Unauthorized user', 'status' => 401], 401);
         }
-        if (intval($user['role']) != -1){
+        if (intval($user['role']) != 1){
             return response()->json(['error' => 'Can not create an object because you do not have permission.', 'status' => 401], 401);
         }
         $input = $request->all();
@@ -170,19 +178,17 @@ class UserController extends Controller
     }
     public function updateUser(Request $request, $id)
     {
-        // dd($request->all());
         $user_id = $this->obj_user->find($id);
         $validator = Validator::make($request->all(),[
             'name' => 'required|min:2',
-            'token'=>'required',
-            'role' => ''
+            'token'=> 'required',
+            'role' => 'required'
         ]);
         if($validator->fails()){
-
             return response()->json($validator->errors(),400);
         }
         $check = $this->obj_user->checkToken($request->all());
-        if($check['role'] == -1)
+        if($check['role'] == 1)
         {
                 $user_id->name = $request->name;
                 $user_id->role = $request->role;
