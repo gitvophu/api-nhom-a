@@ -258,11 +258,18 @@ class UserController extends Controller
         }
        
         $rs = $this->obj_user->updateWithImage($request);
-        if ($rs) {
-            return response()->json(['success'=>'Cap nhat thanh cong'],200);
+        
+        if (!$rs) {
+            return response()->json(['error'=>'xay ra loi'],201);
+        }
+        else if ($rs === 3) {
+            return response()->json(['error'=>'Loi xac thuc'],201);
+        }
+        else if($rs === 2){
+            return response()->json(['error'=>'Email ko ton tai, ko tim thay user'],201);
         }
         else{
-            return response()->json(['error'=>'Email ko ton tai, ko tim thay user'],201);
+            return response()->json(['success'=>'Cap nhat thanh cong'],200);
         }
     }
     // public function send_upload(Request $request){

@@ -117,8 +117,10 @@ class User extends Authenticatable
     public function updateWithImage($request){
         // dd($request->all());
         
-        $user = User::where('email',$request->email)->first();
+		$user = User::where('email',$request->email)->first();
+		
         if ($user->token == $request->token) {
+			
             if ($user) {
                 // $user->phone = $request->phone;
                 // $user->name = $request->name;
@@ -127,17 +129,19 @@ class User extends Authenticatable
                     $file = $request->file('image');
                     $fileName = $file->getClientOriginalName();
                     $file->move('uploads',$fileName);
-                    $user->image = $fileName;
+					$user->image = $fileName;
+					
                     // $file->
                    
                 }
                 $user->save();
                 return true;
             }
-            return false;
+            return 2; // ko tim thay user
         }
         else{
-            return response()->json(['error'=>'Loi xac thuc nguoi dung'],201);
+            return 3;
+            // return response()->json(['error'=>'Loi xac thuc nguoi dung'],201);
         }
         
         
